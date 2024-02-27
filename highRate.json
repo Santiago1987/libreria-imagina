@@ -1,0 +1,10 @@
+{
+  "Rates": [
+    { "clicks": 0, "altura": 0, "color":"#000000" },
+    { "clicks": 10, "altura": 1.5, "color":"#1f0fff" },
+    { "clicks": 20, "altura": 1.6, "color":"#541bed" },
+    { "clicks": 30, "altura": 1.7, "color":"#7b24e0" },
+    { "clicks": 40, "altura": 1.8, "color":"#bd33c9" },
+    { "clicks": 50, "altura": 1.9, "color": "#ff42b3" }
+  ]
+}
