@@ -17,20 +17,21 @@ for (let prod of catfromjson) {
   //if (name === "LIBROS") conts = conts + 1;
 
   let cat = catfrombd.find((el) => {
-    let { catlist } = el
-    return catlist[1] === name[1] && catlist[2] === name[2] && catlist[3] === name[3]
-
+    let { catlist } = el;
+    return (
+      catlist[1] === name[1] && catlist[2] === name[2] && catlist[3] === name[3]
+    );
   });
 
-  if (!cat) proderr.push({ idprod, name })
-  if (cat) prodok.push({ idprod, name })
+  if (!cat) proderr.push({ idprod, name });
+  if (cat) prodok.push({ idprod, name });
 }
 
-//console.log("Poductos ok: " + prodok.length);
-//console.log(prodok);
+console.log("Poductos ok: " + prodok.length);
+console.log(prodok);
 
-console.log("Poductos error: " + proderr.length);
-console.log(proderr);
+//console.log("Poductos error: " + proderr.length);
+//console.log(proderr);
 
 //console.log(catfrombd);
 //console.log(catfromjson);

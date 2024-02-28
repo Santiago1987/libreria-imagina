@@ -10,10 +10,16 @@ export default async function groupCategories() {
 
       //cf_1376 = cf_1376 === 'LIBRO' ? 'LIBROS' : cf_1376
 
-      let name = [cf_1376, cf_1375]
-      if (cf_1395 !== '' && cf_1395 !== ' ' && cf_1395 !== undefined && !cf_1395.includes("---")) name[2] = cf_1395
+      let name = [cf_1376, cf_1375];
+      if (
+        cf_1395 !== "" &&
+        cf_1395 !== " " &&
+        cf_1395 !== undefined &&
+        !cf_1395.includes("---")
+      )
+        name[2] = cf_1395;
 
-      if (cf_1376 === "LIBROS") res.push({ idprod: crmid, name });
+      res.push({ idprod: crmid, name });
     }
   } catch (err) {
     console.log(err);
@@ -22,4 +28,4 @@ export default async function groupCategories() {
   return res;
 }
 
-console.log("AAAAAAAAAAAA", await groupCategories());
+//console.log("AAAAAAAAAAAA", await groupCategories());

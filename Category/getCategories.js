@@ -50,12 +50,10 @@ async function getCategories() {
         name = name.toUpperCase();
         twonam = twonam.toUpperCase();
 
-        if (twonam === "LIBROS") {
-          result.push({
-            idcat: id,
-            catlist: [twonam, name],
-          });
-        }
+        result.push({
+          idcat: id,
+          catlist: [twonam, name],
+        });
       }
 
       //level 3
@@ -72,15 +70,12 @@ async function getCategories() {
         threenam = threenam.toUpperCase();
         twonam = twonam.toUpperCase();
 
-        let catlist = [twonam, threenam, name]
-
+        let catlist = [twonam, threenam, name];
 
         result.push({
           idcat: id,
-          catlist
+          catlist,
         });
-
-
       }
     }
   } catch (err) {
