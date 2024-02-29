@@ -1,9 +1,9 @@
 import { getBigJson } from "../getBigJson.js";
 
-export default async function groupCategories() {
+export default async function groupCategories(bigj = undefined) {
   let res = [];
   try {
-    const bigjson = await getBigJson();
+    const bigjson = bigj ? bigj : await getBigJson();
 
     for (let prod of bigjson) {
       let { crmid, cf_1376, cf_1375, cf_1395 } = prod;
