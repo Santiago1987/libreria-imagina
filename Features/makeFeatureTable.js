@@ -70,7 +70,6 @@ async function makeFeatureTable() {
 
     // BUSCO EL INDICE DEL PADRE EN RESULT
     let featIndx = result.findIndex((el) => el.id === id_feature);
-    console.log(featIndx);
 
     let { values, name } = result[featIndx];
     values.push({ id, value });
@@ -87,7 +86,7 @@ async function makeFeatureTable() {
   return result;
 }
 
-//console.log(await makeFeatureTable());
+//console.log(JSON.stringify(await makeFeatureTable()));
 
 export default makeFeatureTable;
 

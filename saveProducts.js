@@ -15,7 +15,7 @@ async function saveProducts() {
     // TABLA CON TODAS LAS FEATURES Y SUS IDS
     const featuresTable = await makeFeatureTable();
 
-    for (let i = 0; i < 100; i++) {
+    for (let i = 1624; i < 3000; i++) {
       let product = bigjson[i];
       if (!product) return;
 
@@ -49,27 +49,28 @@ async function saveProducts() {
           let featval = prodFeat[featName];
 
           //BUSCO EN LA TABLA DE FEATURES EL ID DE LA FEATURE Y EL ID DEL VALOR
-          let featureSQL = featuresTable.find((el) => el.name === featkey);
+          let featureSQL = featuresTable.find((el) => el.name === featName);
 
           if (!featureSQL) throw new Error("Ningun Feature name coincidio ptm");
 
-          let { values } = featureSQL;
+          let { id: idFeat, values } = featureSQL;
 
           //BUSCO EL ID DE LOS VALUES
-          let featureValSQL = values.find((el) => el.name === featval);
-          if (!featureValSQL)
+          let featureValSQL = values.find((el) => el.value === featval);
+          if (!featureValSQL) {
+            console.log(featureSQL, featval);
             throw new Error("Ningun Feature value name coincidio ptm");
-        }
+          }
+          let { id: idvalue } = featureValSQL;
 
-        let { id: idvalue } = featureValSQL;
-
-        // UNA VEZ OBTENIDOS LOS 2 IDS ARMO EL XML DE LAS FEATURES
-        featureXML =
-          featureXML +
-          `<product_feature>
+          // UNA VEZ OBTENIDOS LOS 2 IDS ARMO EL XML DE LAS FEATURES
+          featureXML =
+            featureXML +
+            `<product_feature>
               <id><![CDATA[{{${idFeat}}}]]></id>
               <id_feature_value><![CDATA[{{${idvalue}}}]]></id_feature_value>
               </product_feature>`;
+        }
 
         // CATEGORIES
         //ARMO UNA ARRAY CON LAS JERARQUIAS
@@ -96,24 +97,52 @@ async function saveProducts() {
         if (cat) {
           let categoriID = cat.idcat;
 
+          //ACOMODO DE LOS DATOS
+
+          productname = htmlEntities(productname).replaceAll(";", "");
+          description = htmlEntities(description)
+            .replaceAll(";", "")
+            .replaceAll("<", "'")
+            .replaceAll(">", "'");
+
+          cf_1375 = 2; //ESTAN MAL LAS CATEGORIAS
+
+          if (!Number(cf_1372)) cf_1372 = ""; // EAN QUE SON PALABRAS
+          if (!Number(weight)) weight = "";
+
+          let title = productname //acá y en description en vez de reemplazar los caracteres podés aplicar la función decodeHtml(param)
+            ? productname
+                .toLowerCase()
+                .split(" ")
+                .map((el) => {
+                  if (!el[0]) return el;
+                  return el[0].toUpperCase() + el.slice(1);
+                })
+                .toString()
+                .replaceAll(",", " ")
+            : "";
+
+          let metaDescription = description.slice(0, 500);
+          cf_1372 = cf_1372.length > 13 ? "" : cf_1372;
+
           let saveProdXML = `<?xml version="1.0" encoding="UTF-8"?>
             <prestashop xmlns:xlink="http://www.w3.org/1999/xlink">
             <product>
-              <id_manufacturer>${manuid}</id_manufacturer>
+              <id_manufacturer><![CDATA[${manuid}]]></id_manufacturer>
               <id_supplier></id_supplier>
-              <id_category_default>${cf_1375}</id_category_default>
+              <id_category_default><![CDATA[${cf_1375}]]></id_category_default>
               <new>1></new>
               <id_default_combination></id_default_combination>
               <id_tax_rules_group></id_tax_rules_group>
               <type>standard</type>
               <id_shop_default>1</id_shop_default>
-              <reference>${crmid}</reference>
+              <reference><![CDATA[${crmid}]]></reference>
               <supplier_reference></supplier_reference>
-              <ean13>${cf_1372}</ean13>
+              <ean13><![CDATA[${cf_1372}]]></ean13>
               <state>1</state>
               <product_type></product_type>
-              <price>${unit_price}</price>
-              <unit_price>${unit_price}</unit_price>
+              <price><![CDATA[${unit_price}]]></price>
+              <unit_price><![CDATA[${unit_price}]]></unit_price>
               <active>1</active>
               <meta_description>
                 <language id="2"><![CDATA[${metaDescription}]]></language>
@@ -139,18 +168,35 @@ async function saveProducts() {
               <associations>
                 <categories>
                   <category>
-                    <id>${categoriID}</id>
+                    <id><![CDATA[${categoriID}]]></id>
                   </category>
                 </categories>
                 <product_features>
-                ${featureXML}
-              </product_features>
+                  ${featureXML}
+                </product_features>
               </associations>
-              <weight>${weight}</weight>
+              <weight><![CDATA[${weight}]]></weight>
             </product>
           </prestashop>`;
 
+          let result = await fetch("https://libreria-test.net/api/products", {
+            method: "POST",
+            headers: {
+              Authorization:
+                "Basic NVJYNzYxSTNBUDJTRkxSNTZDNUM4REFUU1RKRzFFVEw6",
+            },
+            body: saveProdXML,
+          });
+
+          console.log(crmid + " " + result.status);
+          if (result.status < 200 || result.status > 299) {
+            console.log("Ultimo id " + i + "product id: " + crmid);
+            console.log("Razon " + (await result.text()));
+            return;
+          }
+          console.log("AAAAAAAAAA");
           console.log(saveProdXML);
+          console.log("BBBBBBBBBB");
         }
       }
     }
@@ -160,3 +206,82 @@ async function saveProducts() {
 }
 
 console.log(await saveProducts());
+
+function htmlEntities(str) {
+  return String(str)
+    .replaceAll("&ntilde;", "ñ")
+    .replaceAll("&Ntilde;", "Ñ")
+    .replaceAll("&amp;", "&")
+    .replaceAll("&Ntilde;", "Ñ")
+    .replaceAll("&ntilde;", "ñ")
+    .replaceAll("&Ntilde;", "Ñ")
+    .replaceAll("&Agrave;", "À")
+    .replaceAll("&Aacute;", "Á")
+    .replaceAll("&Acirc;", "Â")
+    .replaceAll("&Atilde;", "Ã")
+    .replaceAll("&Auml;", "Ä")
+    .replaceAll("&Aring;", "Å")
+    .replaceAll("&AElig;", "Æ")
+    .replaceAll("&Ccedil;", "Ç")
+    .replaceAll("&Egrave;", "È")
+    .replaceAll("&Eacute;", "É")
+    .replaceAll("&Ecirc;", "Ê")
+    .replaceAll("&Euml;", "Ë")
+    .replaceAll("&Igrave;", "Ì")
+    .replaceAll("&Iacute;", "Í")
+    .replaceAll("&Icirc;", "Î")
+    .replaceAll("&Iuml;", "Ï")
+    .replaceAll("&ETH;", "Ð")
+    .replaceAll("&Ntilde;", "Ñ")
+    .replaceAll("&Ograve;", "Ò")
+    .replaceAll("&Oacute;", "Ó")
+    .replaceAll("&Ocirc;", "Ô")
+    .replaceAll("&Otilde;", "Õ")
+    .replaceAll("&Ouml;", "Ö")
+    .replaceAll("&Oslash;", "Ø")
+    .replaceAll("&Ugrave;", "Ù")
+    .replaceAll("&Uacute;", "Ú")
+    .replaceAll("&Ucirc;", "Û")
+    .replaceAll("&Uuml;", "Ü")
+    .replaceAll("&Yacute;", "Ý")
+    .replaceAll("&THORN;", "Þ")
+    .replaceAll("&szlig;", "ß")
+    .replaceAll("&agrave;", "à")
+    .replaceAll("&aacute;", "á")
+    .replaceAll("&acirc;", "â")
+    .replaceAll("&atilde;", "ã")
+    .replaceAll("&auml;", "ä")
+    .replaceAll("&aring;", "å")
+    .replaceAll("&aelig;", "æ")
+    .replaceAll("&ccedil;", "ç")
+    .replaceAll("&egrave;", "è")
+    .replaceAll("&eacute;", "é")
+    .replaceAll("&ecirc;", "ê")
+    .replaceAll("&euml;", "ë")
+    .replaceAll("&igrave;", "ì")
+    .replaceAll("&iacute;", "í")
+    .replaceAll("&icirc;", "î")
+    .replaceAll("&iuml;", "ï")
+    .replaceAll("&eth;", "ð")
+    .replaceAll("&ntilde;", "ñ")
+    .replaceAll("&ograve;", "ò")
+    .replaceAll("&oacute;", "ó")
+    .replaceAll("&ocirc;", "ô")
+    .replaceAll("&otilde;", "õ")
+    .replaceAll("&ouml;", "ö")
+    .replaceAll("&oslash;", "ø")
+    .replaceAll("&ugrave;", "ù")
+    .replaceAll("&uacute;", "ú")
+    .replaceAll("&ucirc;", "û")
+    .replaceAll("&uuml;", "ü")
+    .replaceAll("&yacute;", "ý")
+    .replaceAll("&thorn;", "þ")
+    .replaceAll("&yuml;", "ÿ")
+    .replaceAll("&iexcl;", "¡")
+    .replaceAll("&quot;", '"')
+    .replaceAll("&ordm;", "º")
+    .replaceAll("&Ordm;", "º")
+    .replaceAll("=", " igual ")
+    .replaceAll("}", "")
+    .replaceAll("#", "");
+}
