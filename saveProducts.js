@@ -19,7 +19,20 @@ async function saveProducts() {
       let product = bigjson[i];
       if (!product) return;
 
-      let { productid, qtyinstock, cf_1374, cf_1394 } = product;
+      let {
+        crmid,
+        qtyinstock,
+        cf_1372,
+        unit_price,
+        description,
+        productname,
+        weight,
+        cf_1374,
+        cf_1376,
+        cf_1375,
+        cf_1395,
+        cf_1394,
+      } = product;
 
       //OBTENGO EL ID DEL PROVEEDOR
       let manuid = await getManufacturerID(cf_1374);
@@ -40,7 +53,7 @@ async function saveProducts() {
 
           if (!featureSQL) throw new Error("Ningun Feature name coincidio ptm");
 
-          let { id: idFeat, values } = featureSQL;
+          let { values } = featureSQL;
 
           //BUSCO EL ID DE LOS VALUES
           let featureValSQL = values.find((el) => el.name === featval);
@@ -56,10 +69,94 @@ async function saveProducts() {
           `<product_feature>
               <id><![CDATA[{{${idFeat}}}]]></id>
               <id_feature_value><![CDATA[{{${idvalue}}}]]></id_feature_value>
-            </product_feature>`;
+              </product_feature>`;
+
+        // CATEGORIES
+        //ARMO UNA ARRAY CON LAS JERARQUIAS
+        let catNames = [cf_1376, cf_1375];
+        if (
+          cf_1395 !== "" &&
+          cf_1395 !== " " &&
+          cf_1395 !== undefined &&
+          !cf_1395.includes("---")
+        )
+          catNames[2] = cf_1395;
+
+        // CONS LOS NOMBRES BUSCO LOS IDS DE LA BD SQL
+        let cat = catTableSQL.find((el) => {
+          let { catlist } = el;
+          return (
+            catlist[1] === catNames[1] &&
+            catlist[2] === catNames[2] &&
+            catlist[3] === catNames[3]
+          );
+        });
+
+        // SI OBETENGO AL CATEGORIA GUARDO EL PRODUCTO
+        if (cat) {
+          let categoriID = cat.idcat;
+
+          let saveProdXML = `<?xml version="1.0" encoding="UTF-8"?>
+            <prestashop xmlns:xlink="http://www.w3.org/1999/xlink">
+            <product>
+              <id_manufacturer>${manuid}</id_manufacturer>
+              <id_supplier></id_supplier>
+              <id_category_default>${cf_1375}</id_category_default>
+              <new>1></new>
+              <id_default_combination></id_default_combination>
+              <id_tax_rules_group></id_tax_rules_group>
+              <type>standard</type>
+              <id_shop_default>1</id_shop_default>
+              <reference>${crmid}</reference>
+              <supplier_reference></supplier_reference>
+              <ean13>${cf_1372}</ean13>
+              <state>1</state>
+              <product_type></product_type>
+              <price>${unit_price}</price>
+              <unit_price>${unit_price}</unit_price>
+              <active>1</active>
+              <meta_description>
+                <language id="2"><![CDATA[${metaDescription}]]></language>
+              </meta_description>
+              <meta_keywords>
+                <language id="2"></language>
+              </meta_keywords>
+              <meta_title>
+                <language id="2"><![CDATA[${title}]]></language>
+              </meta_title>
+              <link_rewrite>
+                <language id="2"></language>
+              </link_rewrite>
+              <name>
+                <language id="2"><![CDATA[${productname}]]></language>
+              </name>
+              <description>
+                <language id="2"><![CDATA[${description}]]></language>
+              </description>
+              <description_short>
+                <language id="2"><![CDATA[${description}]]></language>
+              </description_short>
+              <associations>
+                <categories>
+                  <category>
+                    <id>${categoriID}</id>
+                  </category>
+                </categories>
+                <product_features>
+                ${featureXML}
+              </product_features>
+              </associations>
+              <weight>${weight}</weight>
+            </product>
+          </prestashop>`;
+
+          console.log(saveProdXML);
+        }
       }
     }
   } catch (err) {
     console.error("ERRORRR :", err);
   }
 }
+
+console.log(await saveProducts());
