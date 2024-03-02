@@ -24,6 +24,7 @@ async function getFeatureIds() {
       }
     );
     data = await response.json();
+    console.log(data);
 
     let { id, name } = data.product_feature;
     result.push({ id, name });

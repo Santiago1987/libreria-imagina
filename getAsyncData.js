@@ -26,7 +26,7 @@ const getData = async () => {
 
     let response2 = await fetch(
       "https://dydsoft.com/imagina/webservice.php?operation=login&username=integracion&accessKey=" +
-      cript,
+        cript,
       {
         method: "GET",
       }
@@ -46,7 +46,7 @@ const getData = async () => {
 
     let response3 = await fetch(
       "https://dydsoft.com/imagina/webservice.php?operation=query&elementType=Products&busqueda0=%&campo0=crmid&sessionName=" +
-      result2.sessionName,
+        result2.sessionName,
       {
         method: "GET",
       }
@@ -100,7 +100,7 @@ const getData = async () => {
       manuid ??= 1; // valor por defecto en caso de que no ecuentre nada
 
       try {
-        if (product.productid !== 364) return
+        if (product.productid !== 364) return;
         let res = await saveProduct({ ...product, manuid });
         if (!res.ok) {
           console.log("Ultimo id " + i);
@@ -365,8 +365,11 @@ async function saveProduct(product) {
     productid,
   } = product;
 
-  productname = htmlEntities(productname).replaceAll(";", "")
-  description = htmlEntities(description).replaceAll(";", "").replaceAll("<", "'").replaceAll(">", "'")
+  productname = htmlEntities(productname).replaceAll(";", "");
+  description = htmlEntities(description)
+    .replaceAll(";", "")
+    .replaceAll("<", "'")
+    .replaceAll(">", "'");
 
   cf_1375 = 2; //ESTAN MAL LAS CATEGORIAS
 
@@ -375,18 +378,18 @@ async function saveProduct(product) {
 
   let title = productname //acá y en description en vez de reemplazar los caracteres podés aplicar la función decodeHtml(param)
     ? productname
-      .toLowerCase()
-      .split(" ")
-      .map((el) => {
-        if (!el[0]) return el;
-        return el[0].toUpperCase() + el.slice(1);
-      })
-      .toString()
-      .replaceAll(",", " ")
+        .toLowerCase()
+        .split(" ")
+        .map((el) => {
+          if (!el[0]) return el;
+          return el[0].toUpperCase() + el.slice(1);
+        })
+        .toString()
+        .replaceAll(",", " ")
     : "";
 
-  let metaDescription = description.slice(0, 500)
-  cf_1372 = cf_1372.length > 13 ? "" : cf_1372
+  let metaDescription = description.slice(0, 500);
+  cf_1372 = cf_1372.length > 13 ? "" : cf_1372;
 
   //console.log("product", product)
 
@@ -486,10 +489,7 @@ async function getProdid(reference) {
     }
   );
   if (!result.ok) {
-    throw new Error(
-      "Error in Get product id, status: ",
-      result.status
-    );
+    throw new Error("Error in Get product id, status: ", result.status);
   }
 
   let res = await result.json();
@@ -515,10 +515,7 @@ async function getStockId(prodid) {
     }
   );
   if (!result.ok) {
-    throw new Error(
-      "Error in Stock ID, status: ",
-      result.status
-    );
+    throw new Error("Error in Stock ID, status: ", result.status);
   }
 
   let res = await result.json();
@@ -557,81 +554,81 @@ async function saveStock(prodid, qty) {
   return result;
 }
 
-
 function htmlEntities(str) {
-  return String(str).replaceAll('&ntilde;', 'ñ')
-    .replaceAll('&Ntilde;', 'Ñ')
-    .replaceAll('&amp;', '&')
-    .replaceAll('&Ntilde;', 'Ñ')
-    .replaceAll('&ntilde;', 'ñ')
-    .replaceAll('&Ntilde;', 'Ñ')
-    .replaceAll('&Agrave;', 'À')
-    .replaceAll('&Aacute;', 'Á')
-    .replaceAll('&Acirc;', 'Â')
-    .replaceAll('&Atilde;', 'Ã')
-    .replaceAll('&Auml;', 'Ä')
-    .replaceAll('&Aring;', 'Å')
-    .replaceAll('&AElig;', 'Æ')
-    .replaceAll('&Ccedil;', 'Ç')
-    .replaceAll('&Egrave;', 'È')
-    .replaceAll('&Eacute;', 'É')
-    .replaceAll('&Ecirc;', 'Ê')
-    .replaceAll('&Euml;', 'Ë')
-    .replaceAll('&Igrave;', 'Ì')
-    .replaceAll('&Iacute;', 'Í')
-    .replaceAll('&Icirc;', 'Î')
-    .replaceAll('&Iuml;', 'Ï')
-    .replaceAll('&ETH;', 'Ð')
-    .replaceAll('&Ntilde;', 'Ñ')
-    .replaceAll('&Ograve;', 'Ò')
-    .replaceAll('&Oacute;', 'Ó')
-    .replaceAll('&Ocirc;', 'Ô')
-    .replaceAll('&Otilde;', 'Õ')
-    .replaceAll('&Ouml;', 'Ö')
-    .replaceAll('&Oslash;', 'Ø')
-    .replaceAll('&Ugrave;', 'Ù')
-    .replaceAll('&Uacute;', 'Ú')
-    .replaceAll('&Ucirc;', 'Û')
-    .replaceAll('&Uuml;', 'Ü')
-    .replaceAll('&Yacute;', 'Ý')
-    .replaceAll('&THORN;', 'Þ')
-    .replaceAll('&szlig;', 'ß')
-    .replaceAll('&agrave;', 'à')
-    .replaceAll('&aacute;', 'á')
-    .replaceAll('&acirc;', 'â')
-    .replaceAll('&atilde;', 'ã')
-    .replaceAll('&auml;', 'ä')
-    .replaceAll('&aring;', 'å')
-    .replaceAll('&aelig;', 'æ')
-    .replaceAll('&ccedil;', 'ç')
-    .replaceAll('&egrave;', 'è')
-    .replaceAll('&eacute;', 'é')
-    .replaceAll('&ecirc;', 'ê')
-    .replaceAll('&euml;', 'ë')
-    .replaceAll('&igrave;', 'ì')
-    .replaceAll('&iacute;', 'í')
-    .replaceAll('&icirc;', 'î')
-    .replaceAll('&iuml;', 'ï')
-    .replaceAll('&eth;', 'ð')
-    .replaceAll('&ntilde;', 'ñ')
-    .replaceAll('&ograve;', 'ò')
-    .replaceAll('&oacute;', 'ó')
-    .replaceAll('&ocirc;', 'ô')
-    .replaceAll('&otilde;', 'õ')
-    .replaceAll('&ouml;', 'ö')
-    .replaceAll('&oslash;', 'ø')
-    .replaceAll('&ugrave;', 'ù')
-    .replaceAll('&uacute;', 'ú')
-    .replaceAll('&ucirc;', 'û')
-    .replaceAll('&uuml;', 'ü')
-    .replaceAll('&yacute;', 'ý')
-    .replaceAll('&thorn;', 'þ')
-    .replaceAll('&yuml;', 'ÿ')
-    .replaceAll('&iexcl;', "¡")
-    .replaceAll('&quot;', '"')
-    .replaceAll('&ordm;', "º")
-    .replaceAll('&Ordm;', "º")
-    .replaceAll('=', " igual ")
+  return String(str)
+    .replaceAll("&ntilde;", "ñ")
+    .replaceAll("&Ntilde;", "Ñ")
+    .replaceAll("&amp;", "&")
+    .replaceAll("&Ntilde;", "Ñ")
+    .replaceAll("&ntilde;", "ñ")
+    .replaceAll("&Ntilde;", "Ñ")
+    .replaceAll("&Agrave;", "À")
+    .replaceAll("&Aacute;", "Á")
+    .replaceAll("&Acirc;", "Â")
+    .replaceAll("&Atilde;", "Ã")
+    .replaceAll("&Auml;", "Ä")
+    .replaceAll("&Aring;", "Å")
+    .replaceAll("&AElig;", "Æ")
+    .replaceAll("&Ccedil;", "Ç")
+    .replaceAll("&Egrave;", "È")
+    .replaceAll("&Eacute;", "É")
+    .replaceAll("&Ecirc;", "Ê")
+    .replaceAll("&Euml;", "Ë")
+    .replaceAll("&Igrave;", "Ì")
+    .replaceAll("&Iacute;", "Í")
+    .replaceAll("&Icirc;", "Î")
+    .replaceAll("&Iuml;", "Ï")
+    .replaceAll("&ETH;", "Ð")
+    .replaceAll("&Ntilde;", "Ñ")
+    .replaceAll("&Ograve;", "Ò")
+    .replaceAll("&Oacute;", "Ó")
+    .replaceAll("&Ocirc;", "Ô")
+    .replaceAll("&Otilde;", "Õ")
+    .replaceAll("&Ouml;", "Ö")
+    .replaceAll("&Oslash;", "Ø")
+    .replaceAll("&Ugrave;", "Ù")
+    .replaceAll("&Uacute;", "Ú")
+    .replaceAll("&Ucirc;", "Û")
+    .replaceAll("&Uuml;", "Ü")
+    .replaceAll("&Yacute;", "Ý")
+    .replaceAll("&THORN;", "Þ")
+    .replaceAll("&szlig;", "ß")
+    .replaceAll("&agrave;", "à")
+    .replaceAll("&aacute;", "á")
+    .replaceAll("&acirc;", "â")
+    .replaceAll("&atilde;", "ã")
+    .replaceAll("&auml;", "ä")
+    .replaceAll("&aring;", "å")
+    .replaceAll("&aelig;", "æ")
+    .replaceAll("&ccedil;", "ç")
+    .replaceAll("&egrave;", "è")
+    .replaceAll("&eacute;", "é")
+    .replaceAll("&ecirc;", "ê")
+    .replaceAll("&euml;", "ë")
+    .replaceAll("&igrave;", "ì")
+    .replaceAll("&iacute;", "í")
+    .replaceAll("&icirc;", "î")
+    .replaceAll("&iuml;", "ï")
+    .replaceAll("&eth;", "ð")
+    .replaceAll("&ntilde;", "ñ")
+    .replaceAll("&ograve;", "ò")
+    .replaceAll("&oacute;", "ó")
+    .replaceAll("&ocirc;", "ô")
+    .replaceAll("&otilde;", "õ")
+    .replaceAll("&ouml;", "ö")
+    .replaceAll("&oslash;", "ø")
+    .replaceAll("&ugrave;", "ù")
+    .replaceAll("&uacute;", "ú")
+    .replaceAll("&ucirc;", "û")
+    .replaceAll("&uuml;", "ü")
+    .replaceAll("&yacute;", "ý")
+    .replaceAll("&thorn;", "þ")
+    .replaceAll("&yuml;", "ÿ")
+    .replaceAll("&iexcl;", "¡")
+    .replaceAll("&quot;", '"')
+    .replaceAll("&ordm;", "º")
+    .replaceAll("&Ordm;", "º")
+    .replaceAll("=", " igual ")
     .replaceAll("}", "")
-    .replaceAll("#", "")
+    .replaceAll("#", "");
 }
