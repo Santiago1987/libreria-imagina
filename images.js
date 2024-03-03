@@ -1,64 +1,61 @@
-import { getBigJson } from './getBigJson.js'
-
-const getAllImagesID = async () => {
-    try {
-        let productJson = await getBigJson();
-
-        if (!productJson) throw new Error("Error en la api")
-
-        let images = []
-
-        for (let product of productJson) {
-            let { fotosid, productid } = product;
-            images.push({ productid, fotosid })
-        }
-        console.log(images)
-
-    } catch (err) {
-        console.error("Error: ", err)
-    }
-}
-
 //getAllImagesID()
-
 const getImage = async (id) => {
-    try {
-        let result = await fetch(`https://dydsoft.com/imagina/portal/mostrar_foto.php?id=${id}`, {
-            method: 'GET'
-        })
+  try {
+    /*fetch(`https://dydsoft.com/imagina/portal/ver_foto.php?id=432`)
+      .then((response) => response.blob())
+      .then((blob) => {
+        const objectURL = URL.createObjectURL(blob);
+        console.log(objectURL);
+        //image.src = objectURL;
+      });*/
 
-        return result.blob()
-    } catch (err) {
-        console.log("Error: ", err)
-        return undefined
-    }
+    let response = await fetch(
+      `https://dydsoft.com/imagina/portal/ver_foto.php?id=432`
+    );
+    let blob = await response.blob("image/jpg");
+    //const objectURL = URL.createObjectURL(blob);
 
-}
+    /*let response = await fetch(
+      "https://dydsoft.com/imagina/portal/ver_foto.php?id=432"
+    );
+    let reader = response.body.getReader();
+    let read = await reader.read();
+    let val = btoa(String.fromCharCode.apply(null, read.value));
+    let base64 = "data:image/png;base64," + val;
 
-async function saveImage(prodID, imaID) {
-    let result = undefined
-    try {
-        let image = await getImage(imaID)
-        console.log("image", image)
-        if (!image) return
+    console.log(base64);*/
 
-        const formData = new FormData()
-        formData.append("image", image)
+    const formData = new FormData();
+    formData.append("image", blob);
+
+    const res = await fetch("https://libreria-test.net/api/images/products/1", {
+      method: "POST",
+      headers: {
+        Authorization: "Basic NVJYNzYxSTNBUDJTRkxSNTZDNUM4REFUU1RKRzFFVEw6",
+      },
+      body: formData,
+    });
+    console.log(res.status);
+    console.log(await res.text());
+
+    /*fetch("https://dydsoft.com/imagina/portal/ver_foto.php?id=432")
+      .then((response) => response.body.getReader())
+      .then((response) => response.read())
+      .then((array) => btoa(String.fromCharCode.apply(null, array.value)))
+      .then((partialBase64) => "data:image/png;base64," + partialBase64)
+      .then((fullBase64) => {
+        console.log(fullBase64);
+
+        const formData = new FormData();
+        formData.append("image", fullBase64);
 
 
-        result = await fetch(`https://libreria-test.net/api/images/products/${prodID}`, {
-            method: 'POST',
-            body: formData
-        })
 
+      });*/
+  } catch (err) {
+    console.log("Error: ", err);
+    return undefined;
+  }
+};
 
-    } catch (err) {
-        console.log("Error: ", err)
-        result = undefined
-    }
-    return result
-}
-
-let res = await saveImage(1, 99)
-console.log("text", await res.text())
-console.log("text", await res.status)
+await getImage();
