@@ -15,7 +15,7 @@ async function saveProducts() {
     // TABLA CON TODAS LAS FEATURES Y SUS IDS
     const featuresTable = await makeFeatureTable();
 
-    for (let i = 1624; i < 3000; i++) {
+    for (let i = 12107; i < 13000; i++) {
       let product = bigjson[i];
       if (!product) return;
 
@@ -51,7 +51,7 @@ async function saveProducts() {
           //BUSCO EN LA TABLA DE FEATURES EL ID DE LA FEATURE Y EL ID DEL VALOR
           let featureSQL = featuresTable.find((el) => el.name === featName);
 
-          if (!featureSQL) throw new Error("Ningun Feature name coincidio ptm");
+          if (!featureSQL) throw new Error("Ningun Feature name coincidio ptm: " + i);
 
           let { id: idFeat, values } = featureSQL;
 
@@ -59,7 +59,7 @@ async function saveProducts() {
           let featureValSQL = values.find((el) => el.value === featval);
           if (!featureValSQL) {
             console.log(featureSQL, featval);
-            throw new Error("Ningun Feature value name coincidio ptm");
+            throw new Error("Ningun Feature value name coincidio ptm: " + i);
           }
           let { id: idvalue } = featureValSQL;
 
@@ -67,11 +67,10 @@ async function saveProducts() {
           featureXML =
             featureXML +
             `<product_feature>
-              <id><![CDATA[{{${idFeat}}}]]></id>
-              <id_feature_value><![CDATA[{{${idvalue}}}]]></id_feature_value>
+              <id><![CDATA[${idFeat}]]></id>
+              <id_feature_value><![CDATA[${idvalue}]]></id_feature_value>
               </product_feature>`;
         }
-
         // CATEGORIES
         //ARMO UNA ARRAY CON LAS JERARQUIAS
         let catNames = [cf_1376, cf_1375];
@@ -112,14 +111,14 @@ async function saveProducts() {
 
           let title = productname //acá y en description en vez de reemplazar los caracteres podés aplicar la función decodeHtml(param)
             ? productname
-                .toLowerCase()
-                .split(" ")
-                .map((el) => {
-                  if (!el[0]) return el;
-                  return el[0].toUpperCase() + el.slice(1);
-                })
-                .toString()
-                .replaceAll(",", " ")
+              .toLowerCase()
+              .split(" ")
+              .map((el) => {
+                if (!el[0]) return el;
+                return el[0].toUpperCase() + el.slice(1);
+              })
+              .toString()
+              .replaceAll(",", " ")
             : "";
 
           let metaDescription = description.slice(0, 500);
@@ -188,15 +187,12 @@ async function saveProducts() {
             body: saveProdXML,
           });
 
-          console.log(crmid + " " + result.status);
+          console.log(i + " " + crmid + " " + result.status);
           if (result.status < 200 || result.status > 299) {
-            console.log("Ultimo id " + i + "product id: " + crmid);
+            console.log("Ultimo id " + i + " product id: " + crmid);
             console.log("Razon " + (await result.text()));
             return;
           }
-          console.log("AAAAAAAAAA");
-          console.log(saveProdXML);
-          console.log("BBBBBBBBBB");
         }
       }
     }
