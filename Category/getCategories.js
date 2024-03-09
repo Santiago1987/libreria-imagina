@@ -3,7 +3,7 @@ async function getCategories() {
   let result = [];
   try {
     let response = await fetch(
-      `https://libreria-test.net/api/categories?output_format=JSON`,
+      `https://libreria-test.net/api/categories/?display=[id,name,id_parent,level_depth]&output_format=JSON`,
       {
         method: "GET",
         headers: {
@@ -12,25 +12,11 @@ async function getCategories() {
       }
     );
 
-    let categorisID = await response.json();
-    let { categories } = categorisID;
+    let data = await response.json();
+    let { categories } = data;
 
     for (let el of categories) {
-      let { id } = el;
-
-      response = await fetch(
-        `https://libreria-test.net/api/categories/${id}?output_format=JSON`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: "Basic NVJYNzYxSTNBUDJTRkxSNTZDNUM4REFUU1RKRzFFVEw6",
-          },
-        }
-      );
-
-      let data = await response.json();
-      let { category } = data;
-      let { id: idcat, name, id_parent, level_depth } = category;
+      let { id: idcat, name, id_parent, level_depth } = el;
 
       categoriList.push({ id: idcat, name, id_parent, level_depth });
     }
@@ -38,8 +24,11 @@ async function getCategories() {
     for (let cat of categoriList) {
       let { id, name, id_parent, level_depth } = cat;
 
-      if (name === "FUNDAS") {
-        result.push({ idcat: id, catlist: name });
+      if (name === "Fundas") {
+        result.push({
+          idcat: id,
+          catlist: [name.toUpperCase(), name.toUpperCase()],
+        });
       }
 
       if (level_depth === 3) {
@@ -84,5 +73,8 @@ async function getCategories() {
 
   return result;
 }
-//console.log(await getCategories());
+
+//let result = await getCategories();
+//console.log(result.slice(0, 100));
+//console.log(result.slice(100, 200));
 export default getCategories;

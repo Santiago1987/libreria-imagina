@@ -3,6 +3,7 @@ import getCategories from "./Category/getCategories.js";
 import getManufacturerID from "./Manufacturer/getManufacturerID.js";
 import makeFeatureTable from "./Features/makeFeatureTable.js";
 import destructureFeat from "./Features/destructureFeat.js";
+import savedProductList from "./savedProductList.js";
 
 async function saveProducts() {
   try {
@@ -14,6 +15,9 @@ async function saveProducts() {
 
     // TABLA CON TODAS LAS FEATURES Y SUS IDS
     const featuresTable = await makeFeatureTable();
+
+    //PRODUCTOS QUE YA FUERON GUARDADOS
+    const savedProducts = await savedProductList();
 
     for (let i = 12107; i < 13000; i++) {
       let product = bigjson[i];
@@ -51,7 +55,8 @@ async function saveProducts() {
           //BUSCO EN LA TABLA DE FEATURES EL ID DE LA FEATURE Y EL ID DEL VALOR
           let featureSQL = featuresTable.find((el) => el.name === featName);
 
-          if (!featureSQL) throw new Error("Ningun Feature name coincidio ptm: " + i);
+          if (!featureSQL)
+            throw new Error("Ningun Feature name coincidio ptm: " + i);
 
           let { id: idFeat, values } = featureSQL;
 
@@ -92,8 +97,11 @@ async function saveProducts() {
           );
         });
 
+        //CHECK IF PRODUCT IS ALREADY SAVED
+        let alreadyDB = savedProducts.find((el) => crmid === el.reference);
+
         // SI OBETENGO AL CATEGORIA GUARDO EL PRODUCTO
-        if (cat) {
+        if (cat && !alreadyDB) {
           let categoriID = cat.idcat;
 
           //ACOMODO DE LOS DATOS
@@ -111,14 +119,14 @@ async function saveProducts() {
 
           let title = productname //acá y en description en vez de reemplazar los caracteres podés aplicar la función decodeHtml(param)
             ? productname
-              .toLowerCase()
-              .split(" ")
-              .map((el) => {
-                if (!el[0]) return el;
-                return el[0].toUpperCase() + el.slice(1);
-              })
-              .toString()
-              .replaceAll(",", " ")
+                .toLowerCase()
+                .split(" ")
+                .map((el) => {
+                  if (!el[0]) return el;
+                  return el[0].toUpperCase() + el.slice(1);
+                })
+                .toString()
+                .replaceAll(",", " ")
             : "";
 
           let metaDescription = description.slice(0, 500);
@@ -143,6 +151,9 @@ async function saveProducts() {
               <price><![CDATA[${unit_price}]]></price>
               <unit_price><![CDATA[${unit_price}]]></unit_price>
               <active>1</active>
+              <available_for_order>1</available_for_order>
+              <show_price>1</show_price>
+              <minimal_quantity>1</minimal_quantity>
               <meta_description>
                 <language id="2"><![CDATA[${metaDescription}]]></language>
               </meta_description>
@@ -201,7 +212,7 @@ async function saveProducts() {
   }
 }
 
-console.log(await saveProducts());
+await saveProducts();
 
 function htmlEntities(str) {
   return String(str)
