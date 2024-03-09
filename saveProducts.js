@@ -18,11 +18,11 @@ async function saveProducts() {
 
     //PRODUCTOS QUE YA FUERON GUARDADOS
     const savedProducts = await savedProductList();
-
-    for (let i = 12107; i < 13000; i++) {
+    console.log("EMPIEZA EL LOOP");
+    for (let i = 12105; i < 13000; i++) {
       let product = bigjson[i];
       if (!product) return;
-
+      console.log(i);
       let {
         crmid,
         qtyinstock,
@@ -63,7 +63,7 @@ async function saveProducts() {
           //BUSCO EL ID DE LOS VALUES
           let featureValSQL = values.find((el) => el.value === featval);
           if (!featureValSQL) {
-            console.log(featureSQL, featval);
+            //console.log(featureSQL, featval);
             throw new Error("Ningun Feature value name coincidio ptm: " + i);
           }
           let { id: idvalue } = featureValSQL;
@@ -91,9 +91,9 @@ async function saveProducts() {
         let cat = catTableSQL.find((el) => {
           let { catlist } = el;
           return (
-            catlist[1] === catNames[1] &&
-            catlist[2] === catNames[2] &&
-            catlist[3] === catNames[3]
+            catlist[1] == catNames[1] &&
+            catlist[2] == catNames[2] &&
+            catlist[3] == catNames[3]
           );
         });
 
