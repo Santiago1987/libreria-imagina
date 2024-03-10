@@ -3,6 +3,7 @@ import getCategories from "./Category/getCategories.js";
 import getManufacturerID from "./Manufacturer/getManufacturerID.js";
 import makeFeatureTable from "./Features/makeFeatureTable.js";
 import destructureFeat from "./Features/destructureFeat.js";
+import savedProductList from "./savedProductList.js";
 
 async function saveProducts() {
   try {
@@ -15,10 +16,13 @@ async function saveProducts() {
     // TABLA CON TODAS LAS FEATURES Y SUS IDS
     const featuresTable = await makeFeatureTable();
 
-    for (let i = 12107; i < 13000; i++) {
+    //PRODUCTOS QUE YA FUERON GUARDADOS
+    const savedProducts = await savedProductList();
+    console.log("EMPIEZA EL LOOP");
+    for (let i = 12103; i < 13000; i++) {
       let product = bigjson[i];
       if (!product) return;
-
+      console.log(i);
       let {
         crmid,
         qtyinstock,
@@ -51,14 +55,15 @@ async function saveProducts() {
           //BUSCO EN LA TABLA DE FEATURES EL ID DE LA FEATURE Y EL ID DEL VALOR
           let featureSQL = featuresTable.find((el) => el.name === featName);
 
-          if (!featureSQL) throw new Error("Ningun Feature name coincidio ptm: " + i);
+          if (!featureSQL)
+            throw new Error("Ningun Feature name coincidio ptm: " + i);
 
           let { id: idFeat, values } = featureSQL;
 
           //BUSCO EL ID DE LOS VALUES
           let featureValSQL = values.find((el) => el.value === featval);
           if (!featureValSQL) {
-            console.log(featureSQL, featval);
+            //console.log(featureSQL, featval);
             throw new Error("Ningun Feature value name coincidio ptm: " + i);
           }
           let { id: idvalue } = featureValSQL;
@@ -86,14 +91,17 @@ async function saveProducts() {
         let cat = catTableSQL.find((el) => {
           let { catlist } = el;
           return (
-            catlist[1] === catNames[1] &&
-            catlist[2] === catNames[2] &&
-            catlist[3] === catNames[3]
+            catlist[0] == catNames[0] &&
+            catlist[1] == catNames[1] &&
+            catlist[2] == catNames[2]
           );
         });
 
+        //CHECK IF PRODUCT IS ALREADY SAVED
+        let alreadyDB = savedProducts.find((el) => crmid === el.reference);
+
         // SI OBETENGO AL CATEGORIA GUARDO EL PRODUCTO
-        if (cat) {
+        if (cat && !alreadyDB) {
           let categoriID = cat.idcat;
 
           //ACOMODO DE LOS DATOS
@@ -143,9 +151,10 @@ async function saveProducts() {
               <price><![CDATA[${unit_price}]]></price>
               <unit_price><![CDATA[${unit_price}]]></unit_price>
               <active>1</active>
-              <show_price>1</show_price>
               <available_for_order>1</available_for_order>
+              <show_price>1</show_price>
               <minimal_quantity>1</minimal_quantity>
+              <unity><![CDATA[Por unidad]]></unity>
               <meta_description>
                 <language id="2"><![CDATA[${metaDescription}]]></language>
               </meta_description>
@@ -204,7 +213,7 @@ async function saveProducts() {
   }
 }
 
-console.log(await saveProducts());
+await saveProducts();
 
 function htmlEntities(str) {
   return String(str)

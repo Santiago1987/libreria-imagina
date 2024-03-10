@@ -15,5 +15,5 @@ export default async function savedProductList() {
   return products;
 }
 
-let res = await savedProductList()
-console.log(res.length);
+//let res = await savedProductList()
+
