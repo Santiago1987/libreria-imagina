@@ -143,6 +143,9 @@ async function saveProducts() {
               <price><![CDATA[${unit_price}]]></price>
               <unit_price><![CDATA[${unit_price}]]></unit_price>
               <active>1</active>
+              <show_price>1</show_price>
+              <available_for_order>1</available_for_order>
+              <minimal_quantity>1</minimal_quantity>
               <meta_description>
                 <language id="2"><![CDATA[${metaDescription}]]></language>
               </meta_description>
