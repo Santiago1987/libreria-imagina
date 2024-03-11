@@ -19,10 +19,10 @@ async function saveProducts() {
     //PRODUCTOS QUE YA FUERON GUARDADOS
     const savedProducts = await savedProductList();
     console.log("EMPIEZA EL LOOP");
-    for (let i = 12103; i < 13000; i++) {
+    for (let i = 10012; i < 13000; i++) {
       let product = bigjson[i];
       if (!product) return;
-      console.log(i);
+      //console.log(i);
       let {
         crmid,
         qtyinstock,
@@ -43,7 +43,7 @@ async function saveProducts() {
       manuid ??= 1; // valor por defecto en caso de que no ecuentre nada
 
       //LISTA DE LAS FEATURES DEL PRODUCTO
-      let prodFeat = await destructureFeat(cf_1394);
+      let prodFeat = destructureFeat(cf_1394);
 
       let featureXML = "";
       //ARMO EL XML DE LAS FEATURES CON SUS VALORES
@@ -55,70 +55,71 @@ async function saveProducts() {
           //BUSCO EN LA TABLA DE FEATURES EL ID DE LA FEATURE Y EL ID DEL VALOR
           let featureSQL = featuresTable.find((el) => el.name === featName);
 
-          if (!featureSQL)
-            throw new Error("Ningun Feature name coincidio ptm: " + i);
+          if (featureSQL) {
+            let { id: idFeat, values } = featureSQL;
 
-          let { id: idFeat, values } = featureSQL;
+            //BUSCO EL ID DE LOS VALUES
+            let featureValSQL = values.find((el) => el.value === featval);
+            if (!featureValSQL)
+              featureValSQL = values.find((el) => el.value.includes(featval));
 
-          //BUSCO EL ID DE LOS VALUES
-          let featureValSQL = values.find((el) => el.value === featval);
-          if (!featureValSQL) {
-            //console.log(featureSQL, featval);
-            throw new Error("Ningun Feature value name coincidio ptm: " + i);
-          }
-          let { id: idvalue } = featureValSQL;
+            if (featureValSQL) {
+              let { id: idvalue } = featureValSQL;
 
-          // UNA VEZ OBTENIDOS LOS 2 IDS ARMO EL XML DE LAS FEATURES
-          featureXML =
-            featureXML +
-            `<product_feature>
+              // UNA VEZ OBTENIDOS LOS 2 IDS ARMO EL XML DE LAS FEATURES
+              featureXML =
+                featureXML +
+                `<product_feature>
               <id><![CDATA[${idFeat}]]></id>
               <id_feature_value><![CDATA[${idvalue}]]></id_feature_value>
               </product_feature>`;
+            }
+          }
         }
-        // CATEGORIES
-        //ARMO UNA ARRAY CON LAS JERARQUIAS
-        let catNames = [cf_1376, cf_1375];
-        if (
-          cf_1395 !== "" &&
-          cf_1395 !== " " &&
-          cf_1395 !== undefined &&
-          !cf_1395.includes("---")
-        )
-          catNames[2] = cf_1395;
+      }
+      // CATEGORIES
+      //ARMO UNA ARRAY CON LAS JERARQUIAS
+      let catNames = [cf_1376, cf_1375];
+      if (
+        cf_1395 !== "" &&
+        cf_1395 !== " " &&
+        cf_1395 !== undefined &&
+        !cf_1395.includes("---")
+      )
+        catNames[2] = cf_1395;
 
-        // CONS LOS NOMBRES BUSCO LOS IDS DE LA BD SQL
-        let cat = catTableSQL.find((el) => {
-          let { catlist } = el;
-          return (
-            catlist[0] == catNames[0] &&
-            catlist[1] == catNames[1] &&
-            catlist[2] == catNames[2]
-          );
-        });
+      // CONS LOS NOMBRES BUSCO LOS IDS DE LA BD SQL
+      let cat = catTableSQL.find((el) => {
+        let { catlist } = el;
+        return (
+          catlist[0] == catNames[0] &&
+          catlist[1] == catNames[1] &&
+          catlist[2] == catNames[2]
+        );
+      });
 
-        //CHECK IF PRODUCT IS ALREADY SAVED
-        let alreadyDB = savedProducts.find((el) => crmid === el.reference);
+      //CHECK IF PRODUCT IS ALREADY SAVED
+      let alreadyDB = savedProducts.find((el) => crmid === el.reference);
 
+      if (cat && !alreadyDB) {
         // SI OBETENGO AL CATEGORIA GUARDO EL PRODUCTO
-        if (cat && !alreadyDB) {
-          let categoriID = cat.idcat;
+        let categoriID = cat.idcat;
 
-          //ACOMODO DE LOS DATOS
+        //ACOMODO DE LOS DATOS
 
-          productname = htmlEntities(productname).replaceAll(";", "");
-          description = htmlEntities(description)
-            .replaceAll(";", "")
-            .replaceAll("<", "'")
-            .replaceAll(">", "'");
+        productname = htmlEntities(productname).replaceAll(";", "");
+        description = htmlEntities(description)
+          .replaceAll(";", "")
+          .replaceAll("<", "'")
+          .replaceAll(">", "'");
 
-          cf_1375 = 2; //ESTAN MAL LAS CATEGORIAS
+        cf_1375 = 2; //ESTAN MAL LAS CATEGORIAS
 
-          if (!Number(cf_1372)) cf_1372 = ""; // EAN QUE SON PALABRAS
-          if (!Number(weight)) weight = "";
+        if (!Number(cf_1372)) cf_1372 = ""; // EAN QUE SON PALABRAS
+        if (!Number(weight)) weight = "";
 
-          let title = productname //acá y en description en vez de reemplazar los caracteres podés aplicar la función decodeHtml(param)
-            ? productname
+        let title = productname //acá y en description en vez de reemplazar los caracteres podés aplicar la función decodeHtml(param)
+          ? productname
               .toLowerCase()
               .split(" ")
               .map((el) => {
@@ -127,12 +128,12 @@ async function saveProducts() {
               })
               .toString()
               .replaceAll(",", " ")
-            : "";
+          : "";
 
-          let metaDescription = description.slice(0, 500);
-          cf_1372 = cf_1372.length > 13 ? "" : cf_1372;
+        let metaDescription = description.slice(0, 500);
+        cf_1372 = cf_1372.length > 13 ? "" : cf_1372;
 
-          let saveProdXML = `<?xml version="1.0" encoding="UTF-8"?>
+        let saveProdXML = `<?xml version="1.0" encoding="UTF-8"?>
             <prestashop xmlns:xlink="http://www.w3.org/1999/xlink">
             <product>
               <id_manufacturer><![CDATA[${manuid}]]></id_manufacturer>
@@ -190,21 +191,19 @@ async function saveProducts() {
             </product>
           </prestashop>`;
 
-          let result = await fetch("https://libreria-test.net/api/products", {
-            method: "POST",
-            headers: {
-              Authorization:
-                "Basic NVJYNzYxSTNBUDJTRkxSNTZDNUM4REFUU1RKRzFFVEw6",
-            },
-            body: saveProdXML,
-          });
+        let result = await fetch("https://libreria-test.net/api/products", {
+          method: "POST",
+          headers: {
+            Authorization: "Basic NVJYNzYxSTNBUDJTRkxSNTZDNUM4REFUU1RKRzFFVEw6",
+          },
+          body: saveProdXML,
+        });
 
-          console.log(i + " " + crmid + " " + result.status);
-          if (result.status < 200 || result.status > 299) {
-            console.log("Ultimo id " + i + " product id: " + crmid);
-            console.log("Razon " + (await result.text()));
-            return;
-          }
+        console.log(i + " " + crmid + " " + result.status);
+        if (result.status < 200 || result.status > 299) {
+          console.log("Ultimo id " + i + " product id: " + crmid);
+          console.log("Razon " + (await result.text()));
+          return;
         }
       }
     }

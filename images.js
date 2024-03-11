@@ -1,37 +1,38 @@
-import fs from 'node:fs'
-import FormData from 'form-data';
-import axios from 'axios';
+import fs from "node:fs";
+import FormData from "form-data";
+import axios from "axios";
 
 const saveImage = async () => {
-
   try {
-    const files = fs.readdirSync('./downloads')
+    const files = fs.readdirSync("./downloads");
 
-    for (let i = 2942; i < 4000; i++) {
-
-      let image = files[i]
-      if (!files[i]) return
-      let id = image.split("-")[0]
+    for (let i = 0; i < files.length; i++) {
+      let image = files[i];
+      if (!files[i]) return;
+      let id = image.split("-")[0];
 
       const formData = new FormData();
       const filePath = `./downloads/${image}`;
 
-      const imageBuffer = fs.readFileSync(filePath)
+      const imageBuffer = fs.readFileSync(filePath);
 
       //const fileStream = fs.createReadStream(filePath);
 
-      formData.append("image", imageBuffer, "pepito.jpg");
-      const leng = formData.getLengthSync()
-      //console.log(image)
-      let result = await axios.post(`https://libreria-test.net/api/images/products/${id}`, formData, {
-        headers: {
-          Authorization: "Basic NVJYNzYxSTNBUDJTRkxSNTZDNUM4REFUU1RKRzFFVEw6",
-          "Content-Length": leng,
+      formData.append("image", imageBuffer, id + ".jpg");
+      const leng = formData.getLengthSync();
+      console.log(id + ".jpg");
+      let result = await axios.post(
+        `https://libreria-test.net/api/images/products/${id}`,
+        formData,
+        {
+          headers: {
+            Authorization: "Basic NVJYNzYxSTNBUDJTRkxSNTZDNUM4REFUU1RKRzFFVEw6",
+            "Content-Length": leng,
+          },
         }
-      })
+      );
       console.log(id, result.status, i);
-      if (result.status > 299) return
-
+      if (result.status > 299) return;
 
       /*axios.post(`https://libreria-test.net/api/images/products/${id}`, formData, {
         headers: {
@@ -46,15 +47,11 @@ const saveImage = async () => {
           console.error("Error en linea: ", i);
           error = true
         });*/
-
-
     }
-
   } catch (err) {
-    console.log("Error: ", err.message);
+    console.log("Error: ", err);
     return undefined;
   }
 };
 
 await saveImage();
-
