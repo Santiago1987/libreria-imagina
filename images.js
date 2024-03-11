@@ -6,7 +6,7 @@ const saveImage = async () => {
   try {
     const files = fs.readdirSync("./downloads");
 
-    for (let i = 0; i < files.length; i++) {
+    for (let i = 327; i < files.length; i++) {
       let image = files[i];
       if (!files[i]) return;
       let id = image.split("-")[0];
@@ -20,7 +20,7 @@ const saveImage = async () => {
 
       formData.append("image", imageBuffer, id + ".jpg");
       const leng = formData.getLengthSync();
-      console.log(id + ".jpg");
+
       let result = await axios.post(
         `https://libreria-test.net/api/images/products/${id}`,
         formData,
@@ -49,7 +49,7 @@ const saveImage = async () => {
         });*/
     }
   } catch (err) {
-    console.log("Error: ", err);
+    console.log("Error: ", err.message);
     return undefined;
   }
 };

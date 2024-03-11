@@ -44,6 +44,7 @@ export async function getStockIdTable() {
 export async function saveStockComplete(idstock, qty, idprod) {
     if (!idstock) return 500;
     if (!qty) return 500;
+
     let result = await fetch(
         `https://libreria-test.net/api/stock_availables/${idstock}`,
         {
@@ -64,8 +65,12 @@ export async function saveStockComplete(idstock, qty, idprod) {
             </prestashop>`,
         }
     );
+
     if (!result.ok) {
-        throw new Error("Error in stock creations, status: ", result.status);
+        console.log(result.status)
+        console.log("Error in stock creations:", idstock, qty, idprod)
+
+        throw new Error("Error in stock creations, status: ", result);
     }
     return result;
 }

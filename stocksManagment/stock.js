@@ -15,7 +15,7 @@ async function stock() {
 
             let stockID = stockIdTable.find(el => el.id_product === id)
 
-            if (stockID && id > 384) {
+            if (stockID) {
                 let { id: id_stock } = stockID
 
                 let produdct = bigjson.find(el => el.crmid == reference)
@@ -25,7 +25,6 @@ async function stock() {
                     let { qtyinstock } = produdct
 
                     //result.push({ id_stock, qtyinstock: +qtyinstock })
-
                     let result = await saveStockComplete(id_stock, +qtyinstock, id)
                     console.log("Product: " + id + " status: " + result.status)
                 }
