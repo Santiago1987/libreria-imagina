@@ -22,18 +22,22 @@ async function stock() {
 
         if (!produdct) console.error("NO SE PUDIO ", el.crmid, reference);
         if (produdct) {
-          let { qtyinstock } = produdct;
+          let { qtyinstock, cf_1375, crmid } = produdct;
 
           //result.push({ id_stock, qtyinstock: +qtyinstock })
-          let result = await saveStockComplete(id_stock, +qtyinstock, id);
-          console.log(
-            "Product: " +
-              id +
-              " status: " +
-              result.status +
-              " qty: " +
-              qtyinstock
-          );
+          if (cf_1375 === "FUNDAS") {
+            let result = await saveStockComplete(id_stock, +qtyinstock, id);
+            console.log(
+              "Product: " +
+                id +
+                " status: " +
+                result.status +
+                " qty: " +
+                qtyinstock +
+                " reference: " +
+                crmid
+            );
+          }
         }
       }
     }
