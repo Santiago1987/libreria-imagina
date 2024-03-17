@@ -1,6 +1,4 @@
 export default async function saveStock(idstock, qty) {
-  if (!idstock) return 500;
-  if (!qty) return 500;
   let result = await fetch(
     `https://libreria-test.net/api/stock_availables/${idstock}`,
     {
@@ -42,9 +40,6 @@ export async function getStockIdTable() {
 }
 
 export async function saveStockComplete(idstock, qty, idprod) {
-  if (!idstock) return 500;
-  if (!qty) return 500;
-
   let result = await fetch(
     `https://libreria-test.net/api/stock_availables/${idstock}`,
     {

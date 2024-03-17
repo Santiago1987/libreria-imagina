@@ -1,5 +1,9 @@
+import savedProductList from "../savedProductList.js";
 async function getModStock() {
+  let cont = 0;
   try {
+    const savedProduct = await savedProductList();
+
     let response = await fetch(
       "https://dydsoft.com/imagina/webservice.php?operation=getchallenge&username=integracion",
       {
@@ -50,9 +54,17 @@ async function getModStock() {
 
     console.log(result3);
     console.log(result3.length);
+
+    for (let prod of result3) {
+      let { crmid } = prod;
+      let isSave = savedProduct.find((el) => el.reference === crmid);
+
+      if (!isSave) cont++;
+    }
   } catch (err) {
     console.error("Error: ", err);
   }
+  console.log(cont);
 }
 
 getModStock();
