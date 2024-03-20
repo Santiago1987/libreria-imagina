@@ -6,11 +6,15 @@ let result = await fetch(
 );
 
 let blob = await result.blob();
+blob.name = reference + ".jpeg";
+blob.lastModified = new Date();
 
-console.log("type:", blob.type);
+const imgfile = new File([blob], reference + ".jpeg", {
+  type: blob.type,
+});
 
 const formData = new FormData();
-formData.append("image", blob);
+formData.append("image", imgfile);
 //console.log("data", data);
 
 //la unica manera que funciono de conseguir el puto size
