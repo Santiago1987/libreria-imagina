@@ -10,7 +10,9 @@ const imageBuffer = fs.readFileSync(filePath);
 formData.append("image", imageBuffer, "image.jpg");
 const leng = formData.getLengthSync();
 
-axios
+console.log(leng);
+
+/*axios
   .post(`https://libreria-test.net/api/images/products/1`, formData, {
     headers: {
       Authorization: "Basic NVJYNzYxSTNBUDJTRkxSNTZDNUM4REFUU1RKRzFFVEw6",
@@ -18,5 +20,5 @@ axios
     },
   })
   .then((res) => console.log(res.status.data))
-  .catch((err) => console.log(err.data));
+  .catch((err) => console.log(err.data));*/
 //console.log(432, "result.status.data", i);
