@@ -4,6 +4,7 @@ try {
 
   //LISTA DE PRODUCTS PARA UPDATE
   let updProductList = await productsUPD();
+  console.log("updProductList", updProductList);
 
   //LISTA DE LOS STOCK GUARDADOS CON LOS IDS
   let stocktable = await getStockIdTable();
@@ -31,7 +32,7 @@ try {
         let { id: idstock } = stock;
         let response = await updStock(idstock, +qtyinstock);
         console.log(
-          "Product: " +
+          "Stock Actualizado Product: " +
             id +
             " status: " +
             response.status +
@@ -217,11 +218,9 @@ try {
           body: saveProdXML,
         });
 
-        console.log(i + " " + crmid + " " + result.status);
         if (result.status < 200 || result.status > 299) {
-          console.log("Ultimo id " + i + " product id: " + crmid);
+          console.log("Product id: " + crmid);
           console.log("Razon " + (await result.text()));
-          return;
         }
 
         //--------------------------------------STOCK--------------------------------------
@@ -308,6 +307,7 @@ async function productsUPD() {
   let result2 = res2.result;
 
   let date = new Date();
+  date.setDate(15);
   let dateformat = date.toJSON();
   let response3 = await fetch(
     `https://dydsoft.com/imagina/webservice.php?operation=query&elementType=Products&busqueda0=${dateformat}&campo0=modifiedtime&sessionName=` +
@@ -409,9 +409,9 @@ async function getProductID(ref) {
   let data = await result.json();
 
   let { products } = data;
-  let [id] = products[0];
+  let { id } = products[0];
 
-  return products;
+  return id;
 }
 
 //ID DEL STOCK DE UN PRODUCTO EN ESPECIFICO
@@ -614,14 +614,14 @@ function destructureFeat(feat) {
 }
 
 //GUARDADO DE IMAGENES
-async function saveImages(ref, idProd, isFotoid = false) {
+async function saveImages(reference, idProd, isFotoid = false) {
   let url = "";
 
   if (!isFotoid) {
-    url = `https://dydsoft.com/imagina/portal/ver_foto.php?id=${ref}`;
+    url = `https://dydsoft.com/imagina/portal/ver_foto.php?id=${reference}`;
   }
   if (isFotoid) {
-    url = `https://dydsoft.com/imagina/portal/mostrar_foto.php?id=${ref}`;
+    url = `https://dydsoft.com/imagina/portal/mostrar_foto.php?id=${reference}`;
   }
 
   let result = await fetch(url);
@@ -650,10 +650,11 @@ async function saveImages(ref, idProd, isFotoid = false) {
     body: formData,
   })
     .then((res) => {
-      console.log(res.status);
-      res.text().then((tx) => console.log(tx));
+      console.log("saveImages", idProd, res.status);
+      //res.text().then((tx) => console.log(tx));
+      return res;
     })
-    .catch((err) => console.log(err));
+    .catch((err) => console.log("saveImages", idProd, err));
 }
 
 function htmlEntities(str) {
