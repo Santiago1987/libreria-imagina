@@ -138,7 +138,7 @@ async function saveProducts() {
             <product>
               <id_manufacturer><![CDATA[${manuid}]]></id_manufacturer>
               <id_supplier></id_supplier>
-              <id_category_default><![CDATA[${cf_1375}]]></id_category_default>
+              <id_category_default><![CDATA[${categoriID}]]></id_category_default>
               <new>1></new>
               <id_default_combination></id_default_combination>
               <id_tax_rules_group></id_tax_rules_group>
@@ -148,7 +148,7 @@ async function saveProducts() {
               <supplier_reference></supplier_reference>
               <ean13><![CDATA[${cf_1372}]]></ean13>
               <state>1</state>
-              <product_type></product_type>
+              <product_type><![CDATA[standard]]></product_type>
               <price><![CDATA[${unit_price}]]></price>
               <unit_price><![CDATA[${unit_price}]]></unit_price>
               <active>1</active>
@@ -205,6 +205,34 @@ async function saveProducts() {
           console.log("Razon " + (await result.text()));
           return;
         }
+
+        //--------------------------------------STOCK--------------------------------------
+        // SI EL GUARDADO FUE BIEN ACTUALIZO STOCK
+        //OBTENGO EL ID DEL PRODUCTO NUEVO
+        let idprodNew = await getProductID(crmid);
+        //ID DEL STOCK
+        let idProdStock = await getStockProductID(idprodNew);
+        //GUARDADO DE STOCK
+        let responseStock = await saveStockComplete(
+          idProdStock,
+          +qtyinstock,
+          idprodNew
+        );
+
+        if (!responseStock.ok)
+          console.error("Producto: ", idprodNew, crmid, "stock no actualizado");
+
+        //--------------------------------------IMAGENES--------------------------------------
+        if (!fotosid) {
+          await saveImages(crmid, idprodNew, false);
+        }
+
+        if (fotosid) {
+          let fotolist = fotosid.split(",");
+          for (let el of fotolist) {
+            await saveImages(el, idprodNew, true);
+          }
+        }
       }
     }
   } catch (err) {
@@ -213,6 +241,116 @@ async function saveProducts() {
 }
 
 await saveProducts();
+
+//GUARDADO COMPLETO DE STOCK
+async function saveStockComplete(idstock, qty, idprod) {
+  let result = await fetch(
+    `https://libreria-test.net/api/stock_availables/${idstock}`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: "Basic NVJYNzYxSTNBUDJTRkxSNTZDNUM4REFUU1RKRzFFVEw6",
+      },
+      body: `<?xml version="1.0" encoding="UTF-8"?>
+                <prestashop xmlns:xlink="http://www.w3.org/1999/xlink">
+                <stock_available>
+                    <id><![CDATA[${idstock}]]></id>
+                    <quantity><![CDATA[${qty}]]></quantity>
+                    <id_product><![CDATA[${idprod}]]></id_product>
+                    <depends_on_stock><![CDATA[0]]></depends_on_stock>
+                    <out_of_stock><![CDATA[0]]></out_of_stock>
+                    <id_shop><![CDATA[1]]></id_shop>
+                    <id_product_attribute><![CDATA[0]]></id_product_attribute>
+                </stock_available>
+            </prestashop>`,
+    }
+  );
+  return result;
+}
+
+//ID DE UN PRODUCTO EN ESPECIFICO
+async function getProductID(ref) {
+  let result = await fetch(
+    `https://libreria-test.net/api/products?display=[id,reference]&filter[reference]=${ref}&output_format=JSON`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: "Basic NVJYNzYxSTNBUDJTRkxSNTZDNUM4REFUU1RKRzFFVEw6",
+      },
+    }
+  );
+
+  let data = await result.json();
+
+  let { products } = data;
+  let { id } = products[0];
+
+  return id;
+}
+
+//ID DEL STOCK DE UN PRODUCTO EN ESPECIFICO
+async function getStockProductID(idprod) {
+  let result = await fetch(
+    `https://libreria-test.net/api/stock_availables?display=[id]&filter[id_product]=${idprod}&output_format=JSON`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: "Basic NVJYNzYxSTNBUDJTRkxSNTZDNUM4REFUU1RKRzFFVEw6",
+      },
+    }
+  );
+
+  let data = await result.json();
+
+  let { stock_availables } = data;
+  let { id } = stock_availables[0];
+
+  return id;
+}
+
+//GUARDADO DE IMAGENES
+async function saveImages(reference, idProd, isFotoid = false) {
+  let url = "";
+
+  if (!isFotoid) {
+    url = `https://dydsoft.com/imagina/portal/ver_foto.php?id=${reference}`;
+  }
+  if (isFotoid) {
+    url = `https://dydsoft.com/imagina/portal/mostrar_foto.php?id=${reference}`;
+  }
+
+  let result = await fetch(url);
+  let blob = await result.blob();
+  blob.name = reference + ".jpeg";
+  blob.lastModified = new Date();
+
+  const imgfile = new File([blob], reference + ".jpeg", {
+    type: blob.type,
+  });
+  const formData = new FormData();
+  formData.append("image", imgfile);
+  //console.log("data", data);
+
+  //la unica manera que funciono de conseguir el puto size
+  const response = new Response(formData);
+  let blb = await response.blob();
+  let size = blb.size;
+
+  fetch(`https://libreria-test.net/api/images/products/${idProd}`, {
+    method: "POST",
+    headers: {
+      Authorization: "Basic NVJYNzYxSTNBUDJTRkxSNTZDNUM4REFUU1RKRzFFVEw6",
+      "Content-Length": size,
+    },
+    body: formData,
+  })
+    .then((res) => {
+      console.log("saveImages", idProd, res.status);
+      //res.text().then((tx) => console.log(tx));
+      return res;
+    })
+    .catch((err) => console.log("saveImages", idProd, err));
+}
 
 function htmlEntities(str) {
   return String(str)
