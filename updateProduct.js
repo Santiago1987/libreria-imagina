@@ -30,126 +30,127 @@ try {
         let response = await updStock(idstock, +qtyinstock);
         console.log(
           "Product: " +
-            id +
-            " status: " +
-            response.status +
-            " qty: " +
-            qtyinstock +
-            " reference: " +
-            reference
+          id +
+          " status: " +
+          response.status +
+          " qty: " +
+          qtyinstock +
+          " reference: " +
+          reference
         );
       }
-      //SI EL PRODUCTO NO EXISTE SE INTENTA GUARDAR
-      if (!stock) {
-        let {
-          crmid,
-          qtyinstock,
-          cf_1372,
-          unit_price,
-          description,
-          productname,
-          weight,
-          cf_1374,
-          cf_1376,
-          cf_1375,
-          cf_1395,
-          cf_1394,
-        } = prod;
+    }
+    //SI EL PRODUCTO NO EXISTE SE INTENTA GUARDAR
+    if (!isSave) {
+      let {
+        crmid,
+        qtyinstock,
+        cf_1372,
+        unit_price,
+        description,
+        productname,
+        weight,
+        cf_1374,
+        cf_1376,
+        cf_1375,
+        cf_1395,
+        cf_1394,
+      } = prod;
 
-        //OBTENGO EL ID DEL PROVEEDOR
-        let manuid = await getManufacturerID(cf_1374);
-        manuid ??= 1; // valor por defecto en caso de que no ecuentre nada
+      //OBTENGO EL ID DEL PROVEEDOR
+      let manuid = await getManufacturerID(cf_1374);
+      manuid ??= 1; // valor por defecto en caso de que no ecuentre nada
 
-        //LISTA DE LAS FEATURES DEL PRODUCTO
-        let prodFeat = destructureFeat(cf_1394);
+      //LISTA DE LAS FEATURES DEL PRODUCTO
+      let prodFeat = destructureFeat(cf_1394);
 
-        let featureXML = "";
-        //ARMO EL XML DE LAS FEATURES CON SUS VALORES
-        if (prodFeat) {
-          // RECORRO LAS FEATURES DEL PRODUCTO
-          for (let featName of Object.keys(prodFeat)) {
-            let featval = prodFeat[featName];
+      let featureXML = "";
+      //ARMO EL XML DE LAS FEATURES CON SUS VALORES
+      if (prodFeat) {
+        // RECORRO LAS FEATURES DEL PRODUCTO
+        for (let featName of Object.keys(prodFeat)) {
+          let featval = prodFeat[featName];
 
-            //BUSCO EN LA TABLA DE FEATURES EL ID DE LA FEATURE Y EL ID DEL VALOR
-            let featureSQL = featuresTable.find((el) => el.name === featName);
+          //BUSCO EN LA TABLA DE FEATURES EL ID DE LA FEATURE Y EL ID DEL VALOR
+          let featureSQL = featuresTable.find((el) => el.name === featName);
 
-            if (featureSQL) {
-              let { id: idFeat, values } = featureSQL;
+          if (featureSQL) {
+            let { id: idFeat, values } = featureSQL;
 
-              //BUSCO EL ID DE LOS VALUES
-              let featureValSQL = values.find((el) => el.value === featval);
-              if (!featureValSQL)
-                featureValSQL = values.find((el) => el.value.includes(featval));
+            //BUSCO EL ID DE LOS VALUES
+            let featureValSQL = values.find((el) => el.value === featval);
+            if (!featureValSQL)
+              featureValSQL = values.find((el) => el.value.includes(featval));
 
-              if (featureValSQL) {
-                let { id: idvalue } = featureValSQL;
+            if (featureValSQL) {
+              let { id: idvalue } = featureValSQL;
 
-                // UNA VEZ OBTENIDOS LOS 2 IDS ARMO EL XML DE LAS FEATURES
-                featureXML =
-                  featureXML +
-                  `<product_feature>
+              // UNA VEZ OBTENIDOS LOS 2 IDS ARMO EL XML DE LAS FEATURES
+              featureXML =
+                featureXML +
+                `<product_feature>
               <id><![CDATA[${idFeat}]]></id>
               <id_feature_value><![CDATA[${idvalue}]]></id_feature_value>
               </product_feature>`;
-              }
             }
           }
         }
+      }
 
-        // CATEGORIES
-        //ARMO UNA ARRAY CON LAS JERARQUIAS
-        let catNames = [cf_1376, cf_1375];
-        if (
-          cf_1395 !== "" &&
-          cf_1395 !== " " &&
-          cf_1395 !== undefined &&
-          !cf_1395.includes("---")
-        )
-          catNames[2] = cf_1395;
+      // CATEGORIES
+      //ARMO UNA ARRAY CON LAS JERARQUIAS
+      let catNames = [cf_1376, cf_1375];
+      if (
+        cf_1395 !== "" &&
+        cf_1395 !== " " &&
+        cf_1395 !== undefined &&
+        !cf_1395.includes("---")
+      )
+        catNames[2] = cf_1395;
 
-        // CONS LOS NOMBRES BUSCO LOS IDS DE LA BD SQL
-        let cat = catTableSQL.find((el) => {
-          let { catlist } = el;
-          return (
-            catlist[0] == catNames[0] &&
-            catlist[1] == catNames[1] &&
-            catlist[2] == catNames[2]
-          );
-        });
+      // CONS LOS NOMBRES BUSCO LOS IDS DE LA BD SQL
+      let cat = catTableSQL.find((el) => {
+        let { catlist } = el;
+        return (
+          catlist[0] == catNames[0] &&
+          catlist[1] == catNames[1] &&
+          catlist[2] == catNames[2]
+        );
+      });
 
-        if (cat) {
-          // SI OBETENGO AL CATEGORIA GUARDO EL PRODUCTO
-          let categoriID = cat.idcat;
+      if (cat) {
+        // SI OBETENGO AL CATEGORIA GUARDO EL PRODUCTO
+        let categoriID = cat.idcat;
 
-          //ACOMODO DE LOS DATOS
+        //ACOMODO DE LOS DATOS
 
-          productname = htmlEntities(productname).replaceAll(";", "");
-          description = htmlEntities(description)
-            .replaceAll(";", "")
-            .replaceAll("<", "'")
-            .replaceAll(">", "'");
+        productname = htmlEntities(productname).replaceAll(";", "");
+        description = htmlEntities(description)
+          .replaceAll(";", "")
+          .replaceAll("<", "'")
+          .replaceAll(">", "'");
 
-          cf_1375 = 2; //ESTAN MAL LAS CATEGORIAS
+        cf_1375 = 2; //ESTAN MAL LAS CATEGORIAS
 
-          if (!Number(cf_1372)) cf_1372 = ""; // EAN QUE SON PALABRAS
-          if (!Number(weight)) weight = "";
+        if (!Number(cf_1372)) cf_1372 = ""; // EAN QUE SON PALABRAS
+        if (!Number(weight)) weight = "";
 
-          let title = productname //acá y en description en vez de reemplazar los caracteres podés aplicar la función decodeHtml(param)
-            ? productname
-                .toLowerCase()
-                .split(" ")
-                .map((el) => {
-                  if (!el[0]) return el;
-                  return el[0].toUpperCase() + el.slice(1);
-                })
-                .toString()
-                .replaceAll(",", " ")
-            : "";
+        let title = productname //acá y en description en vez de reemplazar los caracteres podés aplicar la función decodeHtml(param)
+          ? productname
+            .toLowerCase()
+            .split(" ")
+            .map((el) => {
+              if (!el[0]) return el;
+              return el[0].toUpperCase() + el.slice(1);
+            })
+            .toString()
+            .replaceAll(",", " ")
+          : "";
 
-          let metaDescription = description.slice(0, 500);
-          cf_1372 = cf_1372.length > 13 ? "" : cf_1372;
+        let metaDescription = description.slice(0, 500);
+        cf_1372 = cf_1372.length > 13 ? "" : cf_1372;
 
-          let saveProdXML = `<?xml version="1.0" encoding="UTF-8"?>
+        let saveProdXML = `<?xml version="1.0" encoding="UTF-8"?>
             <prestashop xmlns:xlink="http://www.w3.org/1999/xlink">
             <product>
               <id_manufacturer><![CDATA[${manuid}]]></id_manufacturer>
@@ -207,25 +208,66 @@ try {
             </product>
           </prestashop>`;
 
-          let result = await fetch("https://libreria-test.net/api/products", {
-            method: "POST",
-            headers: {
-              Authorization:
-                "Basic NVJYNzYxSTNBUDJTRkxSNTZDNUM4REFUU1RKRzFFVEw6",
-            },
-            body: saveProdXML,
-          });
+        let result = await fetch("https://libreria-test.net/api/products", {
+          method: "POST",
+          headers: {
+            Authorization:
+              "Basic NVJYNzYxSTNBUDJTRkxSNTZDNUM4REFUU1RKRzFFVEw6",
+          },
+          body: saveProdXML,
+        });
 
-          console.log(i + " " + crmid + " " + result.status);
-          if (result.status < 200 || result.status > 299) {
-            console.log("Ultimo id " + i + " product id: " + crmid);
-            console.log("Razon " + (await result.text()));
-            return;
-          }
+        console.log(crmid + " " + result.status);
+        if (result.status < 200 || result.status > 299) {
+          console.log("product id: " + crmid);
+          console.log("Razon " + (await result.text()));
+
         }
+
+        if (result.ok) {
+
+          let response = await fetch(
+            `https://libreria-test.net/api/products/?display=[id]&filter[reference]=${crmid}&output_format=JSON`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: "Basic NVJYNzYxSTNBUDJTRkxSNTZDNUM4REFUU1RKRzFFVEw6",
+              },
+            }
+          );
+
+          let data = await response.json()
+          let { products } = data
+          let { id: idNewProd } = products[0]
+
+          if (idNewProd) {
+            let responseIDS = await fetch(
+              `https://libreria-test.net/api/stock_availables/?display=[id]&filter[id_product]=${idNewProd}&output_format=JSON`,
+              {
+                method: "GET",
+                headers: {
+                  Authorization: "Basic NVJYNzYxSTNBUDJTRkxSNTZDNUM4REFUU1RKRzFFVEw6",
+                },
+              }
+            );
+            data = await responseIDS.json()
+            let { stock_availables } = data
+            let { id: idStock } = stock_availables[0]
+
+            if (idStock) {
+              let responseSaveSto = await saveStockComplete(idStock, +qtyinstock, idNewProd);
+              console.log("Guardado de stock nuevo: ", idNewProd, responseSaveSto.status)
+            }
+          }
+
+        }
+
       }
     }
+
   }
+
+
 } catch (err) {
   console.log("Error: ", err);
 }
@@ -266,7 +308,7 @@ async function productsUPD() {
 
   let response2 = await fetch(
     "https://dydsoft.com/imagina/webservice.php?operation=login&username=integracion&accessKey=" +
-      cript,
+    cript,
     {
       method: "GET",
     }
@@ -283,7 +325,7 @@ async function productsUPD() {
   let dateformat = date.toJSON();
   let response3 = await fetch(
     `https://dydsoft.com/imagina/webservice.php?operation=query&elementType=Products&busqueda0=${dateformat}&campo0=modifiedtime&sessionName=` +
-      result2.sessionName,
+    result2.sessionName,
     {
       method: "GET",
     }
@@ -608,10 +650,10 @@ function md5(e) {
     return c & d
       ? g ^ 2147483648 ^ e ^ f
       : c | d
-      ? g & 1073741824
-        ? g ^ 3221225472 ^ e ^ f
-        : g ^ 1073741824 ^ e ^ f
-      : g ^ e ^ f;
+        ? g & 1073741824
+          ? g ^ 3221225472 ^ e ^ f
+          : g ^ 1073741824 ^ e ^ f
+        : g ^ e ^ f;
   }
 
   function k(a, b, c, d, e, f, g) {
@@ -660,9 +702,9 @@ function md5(e) {
       128 > c
         ? (b += String.fromCharCode(c))
         : (127 < c && 2048 > c
-            ? (b += String.fromCharCode((c >> 6) | 192))
-            : ((b += String.fromCharCode((c >> 12) | 224)),
-              (b += String.fromCharCode(((c >> 6) & 63) | 128))),
+          ? (b += String.fromCharCode((c >> 6) | 192))
+          : ((b += String.fromCharCode((c >> 12) | 224)),
+            (b += String.fromCharCode(((c >> 6) & 63) | 128))),
           (b += String.fromCharCode((c & 63) | 128)));
     }
     return b;
@@ -764,4 +806,30 @@ function md5(e) {
       (c = h(c, s)),
       (d = h(d, t));
   return (p(a) + p(b) + p(c) + p(d)).toLowerCase();
+}
+
+async function saveStockComplete(idstock, qty, idprod) {
+  let result = await fetch(
+    `https://libreria-test.net/api/stock_availables/${idstock}`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: "Basic NVJYNzYxSTNBUDJTRkxSNTZDNUM4REFUU1RKRzFFVEw6",
+      },
+      body: `<?xml version="1.0" encoding="UTF-8"?>
+                <prestashop xmlns:xlink="http://www.w3.org/1999/xlink">
+                <stock_available>
+                    <id><![CDATA[${idstock}]]></id>
+                    <quantity><![CDATA[${qty}]]></quantity>
+                    <id_product><![CDATA[${idprod}]]></id_product>
+                    <depends_on_stock><![CDATA[0]]></depends_on_stock>
+                    <out_of_stock><![CDATA[0]]></out_of_stock>
+                    <id_shop><![CDATA[1]]></id_shop>
+                    <id_product_attribute><![CDATA[0]]></id_product_attribute>
+                </stock_available>
+            </prestashop>`,
+    }
+  );
+
+  return result;
 }
