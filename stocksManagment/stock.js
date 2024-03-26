@@ -32,9 +32,9 @@ async function stock() {
                 id +
                 " status: " +
                 result.status +
-                " qty: " +
+                " qtyinstock: " +
                 qtyinstock +
-                " reference: " +
+                " crmid: " +
                 crmid
             );
           }
