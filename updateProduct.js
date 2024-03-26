@@ -1,4 +1,4 @@
-(async () => {
+async function updateProduct() {
   try {
     // LISTA DE PRODUCTS YA GUARDADOS [{id, reference}]
     let savedProducts = await savedProductList();
@@ -263,7 +263,9 @@
   } catch (err) {
     console.log("Error: ", err);
   }
-})();
+}
+
+updateProduct()
 
 //--------------------------------------------------------------------
 // LISTA DE PRODUCTOS YA GUARDADOS

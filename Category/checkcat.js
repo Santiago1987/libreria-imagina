@@ -6,6 +6,8 @@ const catfrombd = await getCategories();
 const catfromjson = await groupCategories();
 const savedProducts = await savedProductList();
 
+//console.log("catfromjson", catfromjson)
+
 let prodok = [];
 let proderr = [];
 
@@ -26,7 +28,7 @@ for (let prod of catfromjson) {
         catlist[0] == name[0] && catlist[1] == name[1] && catlist[2] == name[2]
       );
     });
-
+    if (name[0] === "FUNDAS") console.log(name[0], name[1], name[2])
     if (!cat) proderr.push({ idprod, name });
     if (cat) prodok.push({ idprod, name });
   }

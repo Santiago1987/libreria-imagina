@@ -9,6 +9,7 @@ async function saveProducts() {
   try {
     // JSON GIGANTE CON TODOS LOS ARTICULOS
     const bigjson = await getBigJson();
+    console.log(bigjson);
 
     // CATEGORIES CON ID DE SQL
     const catTableSQL = await getCategories();
@@ -19,7 +20,7 @@ async function saveProducts() {
     //PRODUCTOS QUE YA FUERON GUARDADOS
     const savedProducts = await savedProductList();
     console.log("EMPIEZA EL LOOP");
-    for (let i = 10012; i < 13000; i++) {
+    for (let i = 0; i < 1; i++) {
       let product = bigjson[i];
       if (!product) return;
       //console.log(i);
@@ -36,6 +37,7 @@ async function saveProducts() {
         cf_1375,
         cf_1395,
         cf_1394,
+        fotosid
       } = product;
 
       //OBTENGO EL ID DEL PROVEEDOR
@@ -120,14 +122,14 @@ async function saveProducts() {
 
         let title = productname //acá y en description en vez de reemplazar los caracteres podés aplicar la función decodeHtml(param)
           ? productname
-              .toLowerCase()
-              .split(" ")
-              .map((el) => {
-                if (!el[0]) return el;
-                return el[0].toUpperCase() + el.slice(1);
-              })
-              .toString()
-              .replaceAll(",", " ")
+            .toLowerCase()
+            .split(" ")
+            .map((el) => {
+              if (!el[0]) return el;
+              return el[0].toUpperCase() + el.slice(1);
+            })
+            .toString()
+            .replaceAll(",", " ")
           : "";
 
         let metaDescription = description.slice(0, 500);
@@ -199,7 +201,6 @@ async function saveProducts() {
           body: saveProdXML,
         });
 
-        console.log(i + " " + crmid + " " + result.status);
         if (result.status < 200 || result.status > 299) {
           console.log("Ultimo id " + i + " product id: " + crmid);
           console.log("Razon " + (await result.text()));
@@ -233,7 +234,11 @@ async function saveProducts() {
             await saveImages(el, idprodNew, true);
           }
         }
+        console.log(i + " " + crmid);
       }
+
+      if (alreadyDB) console.log("YA ESTA EB BD", crmid)
+      if (!cat && !alreadyDB) console.log("No category", catNames, crmid, i)
     }
   } catch (err) {
     console.error("ERRORRR :", err);

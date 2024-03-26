@@ -12,6 +12,8 @@ export default async function savedProductList() {
   let data = await productsIDList.json();
   let { products } = data;
 
+  if (!products) return []
+
   return products;
 }
 
