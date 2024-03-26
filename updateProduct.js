@@ -1,4 +1,4 @@
-(async () => {
+async function updateProduct() {
   try {
     // LISTA DE PRODUCTS YA GUARDADOS [{id, reference}]
     let savedProducts = await savedProductList();
@@ -34,13 +34,13 @@
           let response = await updStock(idstock, +qtyinstock);
           console.log(
             "Stock Actualizado Product: " +
-              id +
-              " status: " +
-              response.status +
-              " qty: " +
-              qtyinstock +
-              " reference: " +
-              reference
+            id +
+            " status: " +
+            response.status +
+            " qty: " +
+            qtyinstock +
+            " reference: " +
+            reference
           );
         }
       }
@@ -140,14 +140,14 @@
 
           let title = productname //acá y en description en vez de reemplazar los caracteres podés aplicar la función decodeHtml(param)
             ? productname
-                .toLowerCase()
-                .split(" ")
-                .map((el) => {
-                  if (!el[0]) return el;
-                  return el[0].toUpperCase() + el.slice(1);
-                })
-                .toString()
-                .replaceAll(",", " ")
+              .toLowerCase()
+              .split(" ")
+              .map((el) => {
+                if (!el[0]) return el;
+                return el[0].toUpperCase() + el.slice(1);
+              })
+              .toString()
+              .replaceAll(",", " ")
             : "";
 
           let metaDescription = description.slice(0, 500);
@@ -263,7 +263,9 @@
   } catch (err) {
     console.log("Error: ", err);
   }
-})();
+}
+
+updateProduct()
 
 //--------------------------------------------------------------------
 // LISTA DE PRODUCTOS YA GUARDADOS
@@ -301,7 +303,7 @@ async function productsUPD() {
 
   let response2 = await fetch(
     "https://dydsoft.com/imagina/webservice.php?operation=login&username=integracion&accessKey=" +
-      cript,
+    cript,
     {
       method: "GET",
     }
@@ -319,7 +321,7 @@ async function productsUPD() {
   let dateformat = date.toJSON();
   let response3 = await fetch(
     `https://dydsoft.com/imagina/webservice.php?operation=query&elementType=Products&busqueda0=${dateformat}&campo0=modifiedtime&sessionName=` +
-      result2.sessionName,
+    result2.sessionName,
     {
       method: "GET",
     }
@@ -755,10 +757,10 @@ function md5(e) {
     return c & d
       ? g ^ 2147483648 ^ e ^ f
       : c | d
-      ? g & 1073741824
-        ? g ^ 3221225472 ^ e ^ f
-        : g ^ 1073741824 ^ e ^ f
-      : g ^ e ^ f;
+        ? g & 1073741824
+          ? g ^ 3221225472 ^ e ^ f
+          : g ^ 1073741824 ^ e ^ f
+        : g ^ e ^ f;
   }
 
   function k(a, b, c, d, e, f, g) {
@@ -807,9 +809,9 @@ function md5(e) {
       128 > c
         ? (b += String.fromCharCode(c))
         : (127 < c && 2048 > c
-            ? (b += String.fromCharCode((c >> 6) | 192))
-            : ((b += String.fromCharCode((c >> 12) | 224)),
-              (b += String.fromCharCode(((c >> 6) & 63) | 128))),
+          ? (b += String.fromCharCode((c >> 6) | 192))
+          : ((b += String.fromCharCode((c >> 12) | 224)),
+            (b += String.fromCharCode(((c >> 6) & 63) | 128))),
           (b += String.fromCharCode((c & 63) | 128)));
     }
     return b;
@@ -911,4 +913,30 @@ function md5(e) {
       (c = h(c, s)),
       (d = h(d, t));
   return (p(a) + p(b) + p(c) + p(d)).toLowerCase();
+}
+
+async function saveStockComplete(idstock, qty, idprod) {
+  let result = await fetch(
+    `https://libreria-test.net/api/stock_availables/${idstock}`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: "Basic NVJYNzYxSTNBUDJTRkxSNTZDNUM4REFUU1RKRzFFVEw6",
+      },
+      body: `<?xml version="1.0" encoding="UTF-8"?>
+                <prestashop xmlns:xlink="http://www.w3.org/1999/xlink">
+                <stock_available>
+                    <id><![CDATA[${idstock}]]></id>
+                    <quantity><![CDATA[${qty}]]></quantity>
+                    <id_product><![CDATA[${idprod}]]></id_product>
+                    <depends_on_stock><![CDATA[0]]></depends_on_stock>
+                    <out_of_stock><![CDATA[0]]></out_of_stock>
+                    <id_shop><![CDATA[1]]></id_shop>
+                    <id_product_attribute><![CDATA[0]]></id_product_attribute>
+                </stock_available>
+            </prestashop>`,
+    }
+  );
+
+  return result;
 }

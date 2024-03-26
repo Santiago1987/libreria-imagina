@@ -18,8 +18,9 @@ export default async function groupCategories(bigj = undefined) {
         !cf_1395.includes("---")
       )
         name[2] = cf_1395;
-
-      res.push({ idprod: crmid, name });
+      if (cf_1376 == "FUNDAS") {
+        res.push({ idprod: crmid, name });
+      }
     }
   } catch (err) {
     console.log(err);
@@ -28,4 +29,4 @@ export default async function groupCategories(bigj = undefined) {
   return res;
 }
 
-//console.log("AAAAAAAAAAAA", await groupCategories());
+console.log("AAAAAAAAAAAA", await groupCategories());
