@@ -1,6 +1,6 @@
 export default function destructureFeat(feat) {
   if (!feat) return;
-  let result = {};
+  let result = [];
 
   if (!feat.includes("--") && feat !== "") {
     let flist = feat.split("|##|");
@@ -12,13 +12,13 @@ export default function destructureFeat(feat) {
       let v = f[1].trim();
 
       //if (!(result[k] instanceof Array)) result[k] = new Array();
-      //result.push({ k, v });
-      result[k] = v;
+      result.push({ k, v });
+      //result[k] = v;
     }
   }
   return result;
 }
 
-//console.log(destructureFeat("COLOR : VERDE |##| TAMANIO:GRANDE"));
+//console.log(destructureFeat("TAPA:CARTÓN |##| TAPA:FLEXIBLE"));
 
 //return  = { COLOR: 'VERDE', TAMANIO: 'GRANDE' };

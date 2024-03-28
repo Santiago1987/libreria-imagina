@@ -9,7 +9,6 @@ async function saveProducts() {
   try {
     // JSON GIGANTE CON TODOS LOS ARTICULOS
     const bigjson = await getBigJson();
-    console.log(bigjson);
 
     // CATEGORIES CON ID DE SQL
     const catTableSQL = await getCategories();
@@ -20,10 +19,9 @@ async function saveProducts() {
     //PRODUCTOS QUE YA FUERON GUARDADOS
     const savedProducts = await savedProductList();
     console.log("EMPIEZA EL LOOP");
-    for (let i = 0; i < 1; i++) {
+    for (let i = 100; i < 15000; i++) {
       let product = bigjson[i];
       if (!product) return;
-      //console.log(i);
       let {
         crmid,
         qtyinstock,
@@ -51,20 +49,18 @@ async function saveProducts() {
       //ARMO EL XML DE LAS FEATURES CON SUS VALORES
       if (prodFeat) {
         // RECORRO LAS FEATURES DEL PRODUCTO
-        for (let featName of Object.keys(prodFeat)) {
-          let featval = prodFeat[featName];
+        for (let feat of prodFeat) {
+          let { k, v } = feat
 
           //BUSCO EN LA TABLA DE FEATURES EL ID DE LA FEATURE Y EL ID DEL VALOR
-          let featureSQL = featuresTable.find((el) => el.name === featName);
-
+          let featureSQL = featuresTable.find((el) => el.name === k);
           if (featureSQL) {
             let { id: idFeat, values } = featureSQL;
 
             //BUSCO EL ID DE LOS VALUES
-            let featureValSQL = values.find((el) => el.value === featval);
+            let featureValSQL = values.find((el) => el.value === v);
             if (!featureValSQL)
-              featureValSQL = values.find((el) => el.value.includes(featval));
-
+              featureValSQL = values.find((el) => el.value.includes(v));
             if (featureValSQL) {
               let { id: idvalue } = featureValSQL;
 
@@ -72,11 +68,13 @@ async function saveProducts() {
               featureXML =
                 featureXML +
                 `<product_feature>
-              <id><![CDATA[${idFeat}]]></id>
-              <id_feature_value><![CDATA[${idvalue}]]></id_feature_value>
-              </product_feature>`;
+                      <id><![CDATA[${idFeat}]]></id>
+                      <id_feature_value><![CDATA[${idvalue}]]></id_feature_value>
+                </product_feature>`;
             }
+
           }
+
         }
       }
       // CATEGORIES
@@ -99,6 +97,16 @@ async function saveProducts() {
           catlist[2] == catNames[2]
         );
       });
+
+      //SI PERTENECE A FUNDAS BUSCO SOLO LA PRIMERA
+      if (!cat && catNames[0] == "FUNDAS") {
+        cat = catTableSQL.find((el) => {
+          let { catlist } = el;
+          return (
+            catlist[0] == "FUNDAS"
+          );
+        });
+      }
 
       //CHECK IF PRODUCT IS ALREADY SAVED
       let alreadyDB = savedProducts.find((el) => crmid === el.reference);
@@ -213,15 +221,17 @@ async function saveProducts() {
         let idprodNew = await getProductID(crmid);
         //ID DEL STOCK
         let idProdStock = await getStockProductID(idprodNew);
-        //GUARDADO DE STOCK
-        let responseStock = await saveStockComplete(
-          idProdStock,
-          +qtyinstock,
-          idprodNew
-        );
+        if (idProdStock) {
+          //GUARDADO DE STOCK
+          let responseStock = await saveStockComplete(
+            idProdStock,
+            +qtyinstock,
+            idprodNew
+          );
 
-        if (!responseStock.ok)
-          console.error("Producto: ", idprodNew, crmid, "stock no actualizado");
+          if (!responseStock.ok)
+            console.error("Producto: ", idprodNew, crmid, "stock no actualizado");
+        }
 
         //--------------------------------------IMAGENES--------------------------------------
         if (!fotosid) {
@@ -237,7 +247,7 @@ async function saveProducts() {
         console.log(i + " " + crmid);
       }
 
-      if (alreadyDB) console.log("YA ESTA EB BD", crmid)
+      if (alreadyDB) console.log("YA ESTA EB BD", crmid, i)
       if (!cat && !alreadyDB) console.log("No category", catNames, crmid, i)
     }
   } catch (err) {
@@ -308,6 +318,7 @@ async function getStockProductID(idprod) {
   let data = await result.json();
 
   let { stock_availables } = data;
+  if (!stock_availables) return undefined
   let { id } = stock_availables[0];
 
   return id;

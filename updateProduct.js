@@ -5,7 +5,6 @@ async function updateProduct() {
 
     //LISTA DE PRODUCTS PARA UPDATE
     let updProductList = await productsUPD();
-    console.log("updProductList", updProductList);
 
     //LISTA DE LOS STOCK GUARDADOS CON LOS IDS
     let stocktable = await getStockIdTable();
@@ -74,20 +73,18 @@ async function updateProduct() {
         //ARMO EL XML DE LAS FEATURES CON SUS VALORES
         if (prodFeat) {
           // RECORRO LAS FEATURES DEL PRODUCTO
-          for (let featName of Object.keys(prodFeat)) {
-            let featval = prodFeat[featName];
+          for (let feat of prodFeat) {
+            let { k, v } = feat
 
             //BUSCO EN LA TABLA DE FEATURES EL ID DE LA FEATURE Y EL ID DEL VALOR
-            let featureSQL = featuresTable.find((el) => el.name === featName);
-
+            let featureSQL = featuresTable.find((el) => el.name === k);
             if (featureSQL) {
               let { id: idFeat, values } = featureSQL;
 
               //BUSCO EL ID DE LOS VALUES
-              let featureValSQL = values.find((el) => el.value === featval);
+              let featureValSQL = values.find((el) => el.value === v);
               if (!featureValSQL)
-                featureValSQL = values.find((el) => el.value.includes(featval));
-
+                featureValSQL = values.find((el) => el.value.includes(v));
               if (featureValSQL) {
                 let { id: idvalue } = featureValSQL;
 
@@ -95,9 +92,9 @@ async function updateProduct() {
                 featureXML =
                   featureXML +
                   `<product_feature>
-              <id><![CDATA[${idFeat}]]></id>
-              <id_feature_value><![CDATA[${idvalue}]]></id_feature_value>
-              </product_feature>`;
+                        <id><![CDATA[${idFeat}]]></id>
+                        <id_feature_value><![CDATA[${idvalue}]]></id_feature_value>
+                  </product_feature>`;
               }
             }
           }
@@ -604,7 +601,7 @@ async function getManufacturerID(name) {
 
 function destructureFeat(feat) {
   if (!feat) return;
-  let result = {};
+  let result = [];
 
   if (!feat.includes("--") && feat !== "") {
     let flist = feat.split("|##|");
@@ -616,8 +613,8 @@ function destructureFeat(feat) {
       let v = f[1].trim();
 
       //if (!(result[k] instanceof Array)) result[k] = new Array();
-      //result.push({ k, v });
-      result[k] = v;
+      result.push({ k, v });
+      //result[k] = v;
     }
   }
   return result;
@@ -913,30 +910,4 @@ function md5(e) {
       (c = h(c, s)),
       (d = h(d, t));
   return (p(a) + p(b) + p(c) + p(d)).toLowerCase();
-}
-
-async function saveStockComplete(idstock, qty, idprod) {
-  let result = await fetch(
-    `https://libreria-test.net/api/stock_availables/${idstock}`,
-    {
-      method: "PATCH",
-      headers: {
-        Authorization: "Basic NVJYNzYxSTNBUDJTRkxSNTZDNUM4REFUU1RKRzFFVEw6",
-      },
-      body: `<?xml version="1.0" encoding="UTF-8"?>
-                <prestashop xmlns:xlink="http://www.w3.org/1999/xlink">
-                <stock_available>
-                    <id><![CDATA[${idstock}]]></id>
-                    <quantity><![CDATA[${qty}]]></quantity>
-                    <id_product><![CDATA[${idprod}]]></id_product>
-                    <depends_on_stock><![CDATA[0]]></depends_on_stock>
-                    <out_of_stock><![CDATA[0]]></out_of_stock>
-                    <id_shop><![CDATA[1]]></id_shop>
-                    <id_product_attribute><![CDATA[0]]></id_product_attribute>
-                </stock_available>
-            </prestashop>`,
-    }
-  );
-
-  return result;
 }

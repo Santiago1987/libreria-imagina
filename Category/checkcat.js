@@ -14,6 +14,17 @@ let proderr = [];
 let conts = 0;
 let cont = 0;
 
+let catl = new Set()
+
+for (let prod of catfrombd) {
+  let { catlist } = prod;
+
+  let last = catlist[2] ? "-" + catlist[2] : ""
+  if (catlist[0] === "REGALERIA") {
+    catl.add(catlist[0] + "-" + catlist[1] + last)
+  }
+}
+
 for (let prod of catfromjson) {
   let { idprod, name } = prod;
 
@@ -28,14 +39,20 @@ for (let prod of catfromjson) {
         catlist[0] == name[0] && catlist[1] == name[1] && catlist[2] == name[2]
       );
     });
-    if (name[0] === "FUNDAS") console.log(name[0], name[1], name[2])
-    if (!cat) proderr.push({ idprod, name });
-    if (cat) prodok.push({ idprod, name });
+    if (name[0] === "REGALERIA" && !cat && false) {
+      //console.log(name[0], name[1], name[2])
+      let last = name[2] ? "-" + name[2] : ""
+      catlist.add(name[0] + "-" + name[1] + last)
+
+    }
+    //if (!cat) proderr.push({ idprod, name });
+    //if (cat) prodok.push({ idprod, name });
   }
 }
+console.log(catl)
 
-console.log("Poductos ok: " + prodok.length);
-console.log(prodok);
+//console.log("Poductos ok: " + prodok.length);
+//console.log(prodok);
 
 //console.log("Poductos error: " + proderr.length);
 //console.log(proderr);
