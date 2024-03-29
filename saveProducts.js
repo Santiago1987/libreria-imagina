@@ -19,7 +19,7 @@ async function saveProducts() {
     //PRODUCTOS QUE YA FUERON GUARDADOS
     const savedProducts = await savedProductList();
     console.log("EMPIEZA EL LOOP");
-    for (let i = 100; i < 15000; i++) {
+    for (let i = 11948; i < 15000; i++) {
       let product = bigjson[i];
       if (!product) return;
       let {
